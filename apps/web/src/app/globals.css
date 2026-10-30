@@ -1,0 +1,153 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Design tokens. Components only reference these semantic colours, never raw palette values,
+ * so light and dark themes stay consistent.
+ */
+:root {
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #5b6b82;
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --accent: #eef2ff;
+  --accent-foreground: #3730a3;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --success: #047857;
+  --success-soft: #ecfdf5;
+  --warning: #b45309;
+  --warning-soft: #fffbeb;
+  --danger-soft: #fef2f2;
+  --info-soft: #eff6ff;
+  --info: #1d4ed8;
+  --border: #e2e8f0;
+  --input: #d5dde8;
+  --ring: #6366f1;
+  --sidebar: #f8fafc;
+  --sidebar-foreground: #334155;
+  --chart-1: #6366f1;
+  --chart-2: #14b8a6;
+  --chart-3: #f59e0b;
+  --chart-4: #ec4899;
+  --chart-5: #0ea5e9;
+  --chart-6: #8b5cf6;
+  --chart-grid: #e2e8f0;
+  --radius: 0.625rem;
+}
+
+.dark {
+  --background: #0a0f1c;
+  --foreground: #e5e9f0;
+  --card: #0f1626;
+  --card-foreground: #e5e9f0;
+  --popover: #111a2c;
+  --popover-foreground: #e5e9f0;
+  --muted: #18223a;
+  --muted-foreground: #9aa8bf;
+  --primary: #6d6af7;
+  --primary-foreground: #ffffff;
+  --secondary: #18223a;
+  --secondary-foreground: #e5e9f0;
+  --accent: #1f1d4d;
+  --accent-foreground: #c7d2fe;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --success: #34d399;
+  --success-soft: #0b2a22;
+  --warning: #fbbf24;
+  --warning-soft: #2b2110;
+  --danger-soft: #2d1416;
+  --info-soft: #102040;
+  --info: #93c5fd;
+  --border: #1f2a40;
+  --input: #2a3752;
+  --ring: #818cf8;
+  --sidebar: #0c1322;
+  --sidebar-foreground: #cbd5e1;
+  /* Validated (dataviz validate_palette.js) against the dark card surface #0f1626. */
+  --chart-1: #6366f1;
+  --chart-2: #0d9488;
+  --chart-3: #d97706;
+  --chart-4: #ec4899;
+  --chart-5: #0284c7;
+  --chart-6: #8b5cf6;
+  --chart-grid: #1f2a40;
+}
+
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -18,6 +18,7 @@ import { api } from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { ariaSort, useListState } from '@/hooks/use-list-state';
 import { useWorkspace, wsKey } from '@/hooks/use-workspace';
+import { useCreateParam } from '@/hooks/use-create-param';
 
 type SortField = 'fullName' | 'company' | 'status' | 'priority' | 'nextFollowUpAt' | 'createdAt';
 
@@ -33,6 +34,11 @@ export default function LeadsPage() {
   const [editing, setEditing] = useState<Lead | undefined>();
   const [converting, setConverting] = useState<Lead | null>(null);
   const [deleting, setDeleting] = useState<Lead | null>(null);
+  const openCreate = useCallback(() => {
+    setEditing(undefined);
+    setFormOpen(true);
+  }, []);
+  useCreateParam(openCreate, can('records:create'));
 
   const data = useQuery({
     queryKey: wsKey(workspaceId, 'leads', 'list', list.query),
@@ -67,6 +73,8 @@ export default function LeadsPage() {
     <>
       <PageHeader
         title="Leads"
+        icon={Target}
+        iconTone="red"
         description="Potential customers to qualify and convert."
         actions={
           can('records:create') && (
@@ -81,7 +89,7 @@ export default function LeadsPage() {
           )
         }
       />
-      <Card>
+      <Card className="overflow-hidden">
         <div className="flex flex-col gap-2 border-b p-3 lg:flex-row lg:items-start">
           <SearchInput value={list.search} onChange={list.setSearch} placeholder="Search name, company, email…" className="lg:w-72 lg:shrink-0" label="Search leads" />
           <div className="grid flex-1 grid-cols-2 gap-2 sm:grid-cols-3 lg:flex lg:flex-wrap lg:justify-end">

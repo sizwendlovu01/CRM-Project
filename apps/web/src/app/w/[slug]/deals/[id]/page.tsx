@@ -92,19 +92,30 @@ export default function DealDetailPage() {
       />
 
       {pipeline.data && (
-        <ol className="mb-6 flex overflow-x-auto rounded-lg border bg-card" aria-label="Deal stage">
-          {pipeline.data.stages.map((s) => {
+        <ol className="mb-6 flex gap-1 overflow-x-auto pb-1" aria-label="Deal stage">
+          {pipeline.data.stages.map((s, index) => {
             const current = s.id === d.stageId;
+            const currentIndex = pipeline.data.stages.findIndex((x) => x.id === d.stageId);
+            const past = index < currentIndex && s.type === 'OPEN';
+            const first = index === 0;
+            const last = index === pipeline.data.stages.length - 1;
             return (
-              <li key={s.id} className="min-w-28 flex-1">
+              <li key={s.id} className="min-w-32 flex-1">
                 <button
                   type="button"
                   disabled={!canEdit || current || move.isPending}
                   onClick={() => move.mutate(s.id)}
                   aria-current={current ? 'step' : undefined}
-                  className={`h-full w-full border-r px-3 py-2.5 text-xs font-medium transition-colors last:border-r-0 disabled:cursor-default ${current ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted enabled:hover:text-foreground'}`}
+                  title={canEdit && !current ? `Move to ${s.name}` : s.name}
+                  style={{
+                    clipPath: `polygon(${first ? '0 0' : '0 0'}, calc(100% - ${last ? '0px' : '14px'}) 0, 100% 50%, calc(100% - ${last ? '0px' : '14px'}) 100%, 0 100%, ${first ? '0 50%' : '14px 50%'})`,
+                    ...(current ? { background: s.color } : {}),
+                  }}
+                  className={`flex h-11 w-full items-center justify-center px-6 text-xs font-bold transition-colors duration-150 disabled:cursor-default ${first ? 'rounded-l-xl' : ''} ${last ? 'rounded-r-xl' : ''} ${
+                    current ? 'text-white shadow-sm' : past ? 'bg-accent text-accent-foreground enabled:hover:bg-accent/70' : 'bg-card text-muted-foreground ring-1 ring-inset ring-border enabled:hover:bg-muted enabled:hover:text-foreground'
+                  }`}
                 >
-                  {s.name}
+                  <span className="truncate">{s.name}</span>
                 </button>
               </li>
             );

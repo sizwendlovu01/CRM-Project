@@ -1,5 +1,6 @@
 'use client';
 
+import { BarChart3 } from 'lucide-react';
 import { humanize } from '@crm/shared';
 import { ErrorState, PageHeader } from '@/components/common';
 import { Card, Skeleton } from '@/components/ui/misc';
@@ -17,6 +18,8 @@ export default function AnalyticsPage() {
     <>
       <PageHeader
         title="Analytics"
+        icon={BarChart3}
+        iconTone="blue"
         description={`Live business intelligence computed from your CRM records${workspace.role === 'SALES_REPRESENTATIVE' ? ' (scoped to your records)' : ''}. Periods are grouped in UTC.`}
         actions={<RangeControls {...analytics} />}
       />

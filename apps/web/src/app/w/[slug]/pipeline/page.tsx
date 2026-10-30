@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { KanbanSquare, Plus, Settings2 } from 'lucide-react';
+import { CircleDollarSign, Gauge, Handshake, KanbanSquare, Plus, Scale, Settings2 } from 'lucide-react';
 import type { Board } from '@crm/shared';
 import { EmptyState, ErrorState, PageHeader, SearchInput } from '@/components/common';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/input';
-import { Card, Skeleton } from '@/components/ui/misc';
+import { Card, IconTile, Skeleton, type IconTone } from '@/components/ui/misc';
 import { DealFormDialog, usePipelines } from '@/features/deals/deal-form';
 import { KanbanBoard } from '@/features/pipeline/kanban-board';
 import { StageManagerDialog } from '@/features/pipeline/stage-manager';
@@ -40,6 +40,8 @@ export default function PipelinePage() {
     <>
       <PageHeader
         title="Sales pipeline"
+        icon={KanbanSquare}
+        iconTone="primary"
         description="Drag deals between stages. Changes save automatically."
         actions={
           <>
@@ -58,15 +60,26 @@ export default function PipelinePage() {
       />
 
       <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          ['Open pipeline', totals ? formatCurrency(totals.openValue, workspace.currency) : null],
-          ['Weighted forecast', totals ? formatCurrency(totals.weightedValue, workspace.currency) : null],
-          ['Open deals', totals ? String(totals.openDeals) : null],
-          ['Won (this pipeline)', totals ? formatCurrency(totals.wonValue, workspace.currency) : null],
-        ].map(([label, value]) => (
-          <Card key={label} className="p-4">
-            <p className="text-xs text-muted-foreground">{label}</p>
-            {value === null ? <Skeleton className="mt-2 h-6 w-24" /> : <p className="mt-1 text-xl font-semibold" data-testid={`total-${label}`}>{value}</p>}
+        {(
+          [
+            ['Open pipeline', totals ? formatCurrency(totals.openValue, workspace.currency) : null, Gauge, 'blue'],
+            ['Weighted forecast', totals ? formatCurrency(totals.weightedValue, workspace.currency) : null, Scale, 'primary'],
+            ['Open deals', totals ? String(totals.openDeals) : null, Handshake, 'amber'],
+            ['Won (this pipeline)', totals ? formatCurrency(totals.wonValue, workspace.currency) : null, CircleDollarSign, 'green'],
+          ] as const
+        ).map(([label, value, icon, tone]) => (
+          <Card key={label} className="flex items-center gap-3 p-4">
+            <IconTile icon={icon} tone={tone as IconTone} />
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-muted-foreground">{label}</p>
+              {value === null ? (
+                <Skeleton className="mt-1.5 h-6 w-24" />
+              ) : (
+                <p className="font-[family-name:var(--font-jakarta)] text-xl font-extrabold" data-testid={`total-${label}`}>
+                  {value}
+                </p>
+              )}
+            </div>
           </Card>
         ))}
       </div>

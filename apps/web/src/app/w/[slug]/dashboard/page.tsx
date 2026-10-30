@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, CalendarClock } from 'lucide-react';
+import { ArrowRight, Building2, CalendarClock, KanbanSquare, ListTodo, Target } from 'lucide-react';
 import type { Activity, Paginated, Task } from '@crm/shared';
-import { EmptyState, ErrorState, PageHeader } from '@/components/common';
+import { EmptyState, ErrorState } from '@/components/common';
 import { PriorityBadge } from '@/components/labels';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, Skeleton } from '@/components/ui/misc';
@@ -24,7 +24,7 @@ function greeting(): string {
 }
 
 export default function DashboardPage() {
-  const { me, base, workspaceId, href, workspace } = useWorkspace();
+  const { me, base, workspaceId, href, workspace, can } = useWorkspace();
   const analytics = useAnalytics();
   const { query } = analytics;
   const tasks = useQuery({
@@ -38,11 +38,48 @@ export default function DashboardPage() {
 
   return (
     <>
-      <PageHeader
-        title={`${greeting()}, ${me.name.split(' ')[0]}`}
-        description={`Here's how ${workspace.name} is performing${workspace.role === 'SALES_REPRESENTATIVE' ? ' (your records)' : ''}.`}
-        actions={<RangeControls {...analytics} />}
-      />
+      <section className="relative mb-6 overflow-hidden rounded-2xl border bg-[image:var(--hero-gradient)] p-5 shadow-sm sm:p-7">
+        <div aria-hidden className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-primary/15 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-24 right-40 h-56 w-56 rounded-full bg-status-teal/15 blur-3xl" />
+        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-primary">{new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date())}</p>
+            <h1 className="mt-1 text-2xl font-extrabold tracking-tight sm:text-3xl">
+              {greeting()}, {me.name.split(' ')[0]}
+            </h1>
+            <p className="mt-1.5 text-sm text-muted-foreground">
+              Here&apos;s how {workspace.name} is performing{workspace.role === 'SALES_REPRESENTATIVE' ? ' (your records)' : ''}.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {can('records:create') && (
+                <>
+                  <Button size="sm" asChild>
+                    <Link href={`${href('/customers')}?create=1`}>
+                      <Building2 /> Add customer
+                    </Link>
+                  </Button>
+                  <Button size="sm" variant="outline" asChild>
+                    <Link href={`${href('/leads')}?create=1`}>
+                      <Target /> Add lead
+                    </Link>
+                  </Button>
+                  <Button size="sm" variant="outline" asChild>
+                    <Link href={`${href('/tasks')}?create=1`}>
+                      <ListTodo /> Add task
+                    </Link>
+                  </Button>
+                </>
+              )}
+              <Button size="sm" variant="ghost" asChild>
+                <Link href={href('/pipeline')}>
+                  <KanbanSquare /> Open pipeline
+                </Link>
+              </Button>
+            </div>
+          </div>
+          <RangeControls {...analytics} />
+        </div>
+      </section>
       {query.isError ? (
         <Card><ErrorState error={query.error} onRetry={() => void query.refetch()} /></Card>
       ) : (

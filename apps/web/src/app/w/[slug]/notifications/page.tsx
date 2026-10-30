@@ -35,6 +35,8 @@ export default function NotificationsPage() {
     <>
       <PageHeader
         title="Notifications"
+        icon={Bell}
+        iconTone="blue"
         description="Assignments, deal updates, reminders and invitations."
         actions={
           <>
@@ -49,7 +51,7 @@ export default function NotificationsPage() {
           <TabsTrigger value="unread">Unread{data.data?.unreadCount ? ` (${data.data.unreadCount})` : ''}</TabsTrigger>
         </TabsList>
       </Tabs>
-      <Card>
+      <Card className="overflow-hidden">
         {data.isPending ? (
           <TableSkeleton rows={5} columns={2} />
         ) : data.isError ? (

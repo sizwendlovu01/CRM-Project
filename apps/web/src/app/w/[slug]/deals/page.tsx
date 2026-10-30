@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import Link from 'next/link';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Archive, ArchiveRestore, CircleDollarSign, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react';
@@ -17,6 +17,7 @@ import { api } from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { ariaSort, useListState } from '@/hooks/use-list-state';
 import { useWorkspace, wsKey } from '@/hooks/use-workspace';
+import { useCreateParam } from '@/hooks/use-create-param';
 
 type SortField = 'title' | 'value' | 'expectedCloseDate' | 'createdAt';
 
@@ -31,6 +32,11 @@ export default function DealsPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Deal | undefined>();
   const [deleting, setDeleting] = useState<Deal | null>(null);
+  const openCreate = useCallback(() => {
+    setEditing(undefined);
+    setFormOpen(true);
+  }, []);
+  useCreateParam(openCreate, can('records:create'));
 
   const data = useQuery({
     queryKey: wsKey(workspaceId, 'deals', 'list', list.query),
@@ -67,6 +73,8 @@ export default function DealsPage() {
     <>
       <PageHeader
         title="Deals"
+        icon={CircleDollarSign}
+        iconTone="green"
         description="Every opportunity across your pipelines."
         actions={
           can('records:create') && (
@@ -81,7 +89,7 @@ export default function DealsPage() {
           )
         }
       />
-      <Card>
+      <Card className="overflow-hidden">
         <div className="flex flex-col gap-2 border-b p-3 xl:flex-row xl:items-center">
           <SearchInput value={list.search} onChange={list.setSearch} placeholder="Search deals or customers…" className="xl:w-72 xl:shrink-0" label="Search deals" />
           <div className="grid flex-1 grid-cols-2 gap-2 sm:grid-cols-4 xl:flex xl:flex-wrap xl:justify-end">

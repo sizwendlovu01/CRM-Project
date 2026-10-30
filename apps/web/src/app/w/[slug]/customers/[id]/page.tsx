@@ -163,8 +163,8 @@ export default function CustomerDetailPage() {
               ['Open tasks', String(c.stats.openTasks)],
             ].map(([label, value]) => (
               <Card key={label} className="p-4">
-                <p className="text-xs text-muted-foreground">{label}</p>
-                <p className="mt-1 text-lg font-semibold">{value}</p>
+                <p className="text-xs font-semibold text-muted-foreground">{label}</p>
+                <p className="mt-1 font-[family-name:var(--font-jakarta)] text-lg font-extrabold">{value}</p>
               </Card>
             ))}
           </div>

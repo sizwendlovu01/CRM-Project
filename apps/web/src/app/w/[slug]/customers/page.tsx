@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -20,6 +20,7 @@ import { api, downloadFile, errorMessage } from '@/lib/api';
 import { formatDate, formatRelative } from '@/lib/format';
 import { ariaSort, useListState } from '@/hooks/use-list-state';
 import { useWorkspace, wsKey } from '@/hooks/use-workspace';
+import { useCreateParam } from '@/hooks/use-create-param';
 
 type SortField = 'fullName' | 'company' | 'status' | 'createdAt' | 'lastInteractionAt';
 
@@ -37,6 +38,11 @@ export default function CustomersPage() {
   const [duplicatesOpen, setDuplicatesOpen] = useState(false);
   const [deleting, setDeleting] = useState<Customer | null>(null);
   const [exporting, setExporting] = useState(false);
+  const openCreate = useCallback(() => {
+    setEditing(undefined);
+    setFormOpen(true);
+  }, []);
+  useCreateParam(openCreate, can('records:create'));
 
   const data = useQuery({
     queryKey: wsKey(workspaceId, 'customers', 'list', list.query),
@@ -84,6 +90,8 @@ export default function CustomersPage() {
     <>
       <PageHeader
         title="Customers"
+        icon={Building2}
+        iconTone="green"
         description="People and companies you do business with."
         actions={
           <>
@@ -117,7 +125,7 @@ export default function CustomersPage() {
         }
       />
 
-      <Card>
+      <Card className="overflow-hidden">
         <div className="flex flex-col gap-2 border-b p-3 lg:flex-row lg:items-start">
           <SearchInput value={list.search} onChange={list.setSearch} placeholder="Search name, company, email, phone…" className="lg:w-72 lg:shrink-0" label="Search customers" />
           <div className="grid flex-1 grid-cols-2 gap-2 sm:grid-cols-3 lg:flex lg:flex-wrap lg:justify-end">

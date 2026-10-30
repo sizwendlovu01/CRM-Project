@@ -1,26 +1,43 @@
 import { humanize, type CustomerStatus, type DealStatus, type LeadStatus, type Priority, type TaskStatus } from '@crm/shared';
-import { Badge } from './ui/misc';
+import { cn } from '@/lib/utils';
+import { StatusPill, type StatusColor } from './ui/misc';
 
-type Tone = 'neutral' | 'primary' | 'success' | 'warning' | 'danger' | 'info';
+/* Colour language shared across the app: blue = new/open, violet = in conversation,
+   amber = in progress, green = positive outcome, red = negative outcome, slate = inactive. */
+const CUSTOMER_COLORS: Record<CustomerStatus, StatusColor> = { PROSPECT: 'blue', ACTIVE: 'green', INACTIVE: 'slate', CHURNED: 'red' };
+const LEAD_COLORS: Record<LeadStatus, StatusColor> = { NEW: 'blue', CONTACTED: 'violet', QUALIFIED: 'green', UNQUALIFIED: 'slate', CONVERTED: 'teal' };
+const DEAL_COLORS: Record<DealStatus, StatusColor> = { OPEN: 'blue', WON: 'green', LOST: 'red' };
+const TASK_COLORS: Record<TaskStatus, StatusColor> = { TODO: 'slate', IN_PROGRESS: 'amber', COMPLETED: 'green', CANCELLED: 'slate' };
 
-const CUSTOMER_TONES: Record<CustomerStatus, Tone> = { PROSPECT: 'info', ACTIVE: 'success', INACTIVE: 'neutral', CHURNED: 'danger' };
-const LEAD_TONES: Record<LeadStatus, Tone> = { NEW: 'info', CONTACTED: 'primary', QUALIFIED: 'success', UNQUALIFIED: 'neutral', CONVERTED: 'success' };
-const DEAL_TONES: Record<DealStatus, Tone> = { OPEN: 'primary', WON: 'success', LOST: 'danger' };
-const TASK_TONES: Record<TaskStatus, Tone> = { TODO: 'neutral', IN_PROGRESS: 'info', COMPLETED: 'success', CANCELLED: 'neutral' };
-const PRIORITY_TONES: Record<Priority, Tone> = { LOW: 'neutral', MEDIUM: 'info', HIGH: 'warning', URGENT: 'danger' };
-
-export function StatusBadge({ kind, value }: { kind: 'customer' | 'lead' | 'deal' | 'task'; value: string }) {
-  const tones: Record<string, Tone> =
-    kind === 'customer' ? CUSTOMER_TONES : kind === 'lead' ? LEAD_TONES : kind === 'deal' ? DEAL_TONES : TASK_TONES;
-  return <Badge tone={tones[value] ?? 'neutral'}>{humanize(value)}</Badge>;
+export function StatusBadge({ kind, value, className }: { kind: 'customer' | 'lead' | 'deal' | 'task'; value: string; className?: string }) {
+  const colors: Record<string, StatusColor> =
+    kind === 'customer' ? CUSTOMER_COLORS : kind === 'lead' ? LEAD_COLORS : kind === 'deal' ? DEAL_COLORS : TASK_COLORS;
+  return (
+    <StatusPill color={colors[value] ?? 'slate'} className={className}>
+      {humanize(value)}
+    </StatusPill>
+  );
 }
 
+const PRIORITY_STYLES: Record<Priority, { dot: string; text: string; bars: number }> = {
+  LOW: { dot: 'bg-status-slate', text: 'text-muted-foreground', bars: 1 },
+  MEDIUM: { dot: 'bg-status-blue', text: 'text-info', bars: 2 },
+  HIGH: { dot: 'bg-status-amber', text: 'text-warning', bars: 3 },
+  URGENT: { dot: 'bg-status-red', text: 'text-destructive', bars: 4 },
+};
+
+/** Priority shown with a signal-strength glyph plus text, so it never relies on colour alone. */
 export function PriorityBadge({ value }: { value: Priority }) {
+  const style = PRIORITY_STYLES[value];
   return (
-    <Badge tone={PRIORITY_TONES[value]}>
-      <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-current" />
+    <span className={cn('inline-flex items-center gap-1.5 whitespace-nowrap text-xs font-semibold', style.text)}>
+      <span aria-hidden className="flex h-3 items-end gap-[2px]">
+        {[1, 2, 3, 4].map((bar) => (
+          <span key={bar} className={cn('w-[3px] rounded-sm', bar <= style.bars ? style.dot : 'bg-border-strong')} style={{ height: `${bar * 3}px` }} />
+        ))}
+      </span>
       {humanize(value)}
-    </Badge>
+    </span>
   );
 }
 

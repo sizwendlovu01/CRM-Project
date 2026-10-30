@@ -42,8 +42,8 @@ export default function ActivitiesPage() {
 
   return (
     <>
-      <PageHeader title="Activities" description="Calls, emails, meetings, notes and follow-ups across the workspace." actions={can('records:create') && <Button onClick={() => setOpen(true)}><Plus /> Log activity</Button>} />
-      <Card>
+      <PageHeader title="Activities" icon={ActivityIcon} iconTone="red" description="Calls, emails, meetings, notes and follow-ups across the workspace." actions={can('records:create') && <Button onClick={() => setOpen(true)}><Plus /> Log activity</Button>} />
+      <Card className="overflow-hidden">
         <div className="flex flex-col gap-2 border-b p-3 sm:flex-row sm:items-center">
           <SearchInput value={list.search} onChange={list.setSearch} placeholder="Search activities…" className="sm:w-72" label="Search activities" />
           <div className="flex flex-1 gap-2 sm:justify-end">

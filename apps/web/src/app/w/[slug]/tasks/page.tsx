@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useCallback, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -19,6 +19,7 @@ import { formatDateTime, formatRelative } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { ariaSort, useListState } from '@/hooks/use-list-state';
 import { useWorkspace, wsKey } from '@/hooks/use-workspace';
+import { useCreateParam } from '@/hooks/use-create-param';
 
 type SortField = 'dueAt' | 'priority' | 'title' | 'createdAt';
 
@@ -104,6 +105,11 @@ function TasksView() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Task | undefined>();
   const [deleting, setDeleting] = useState<Task | null>(null);
+  const openCreate = useCallback(() => {
+    setEditing(undefined);
+    setFormOpen(true);
+  }, []);
+  useCreateParam(openCreate, can('records:create'));
 
   const data = useQuery({
     queryKey: wsKey(workspaceId, 'tasks', 'list', list.query),
@@ -139,6 +145,8 @@ function TasksView() {
     <>
       <PageHeader
         title="Tasks"
+        icon={ListTodo}
+        iconTone="amber"
         description="Follow-ups and to-dos for you and your team."
         actions={can('records:create') && <Button onClick={() => { setEditing(undefined); setFormOpen(true); }}><Plus /> New task</Button>}
       />
@@ -155,7 +163,7 @@ function TasksView() {
           </Button>
         ))}
       </div>
-      <Card>
+      <Card className="overflow-hidden">
         <div className="flex flex-col gap-2 border-b p-3 lg:flex-row lg:items-center">
           <SearchInput value={list.search} onChange={list.setSearch} placeholder="Search tasks…" className="lg:w-72" label="Search tasks" />
           <div className="grid flex-1 grid-cols-3 gap-2 lg:flex lg:justify-end">

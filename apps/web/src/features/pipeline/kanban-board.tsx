@@ -72,11 +72,12 @@ function DealCardBody({ deal, canMove, stages, onMoveTo, overlay, nodeRef, style
       data-testid={overlay ? undefined : `deal-card-${deal.id}`}
       data-deal-title={overlay ? undefined : deal.title}
       className={cn(
-        'group rounded-lg border bg-card p-3 text-sm shadow-xs transition-shadow hover:shadow-md',
-        dragging && !overlay && 'opacity-40',
-        overlay && 'rotate-2 shadow-xl ring-2 ring-primary/40',
+        'group relative overflow-hidden rounded-xl border bg-card p-3 pl-3.5 text-sm shadow-xs transition-[box-shadow,transform,border-color] duration-150 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-md',
+        dragging && !overlay && 'opacity-35',
+        overlay && 'rotate-[2.5deg] scale-[1.02] shadow-xl ring-2 ring-primary/40',
       )}
     >
+      <span aria-hidden className="absolute inset-y-0 left-0 w-1" style={{ background: deal.stage.color }} />
       <div className="flex items-start gap-2">
         {canMove && (
           <button
@@ -89,7 +90,7 @@ function DealCardBody({ deal, canMove, stages, onMoveTo, overlay, nodeRef, style
           </button>
         )}
         <div className="min-w-0 flex-1">
-          <Link href={href(`/deals/${deal.id}`)} className="block font-medium leading-snug hover:text-primary">
+          <Link href={href(`/deals/${deal.id}`)} className="block font-semibold leading-snug hover:text-primary">
             {deal.title}
           </Link>
           {deal.customer && <p className="truncate text-xs text-muted-foreground">{deal.customer.company ?? deal.customer.fullName}</p>}
@@ -115,14 +116,14 @@ function DealCardBody({ deal, canMove, stages, onMoveTo, overlay, nodeRef, style
         )}
       </div>
       <div className="mt-3 flex items-center justify-between gap-2">
-        <span className="font-semibold">{formatCurrency(deal.value, deal.currency)}</span>
+        <span className="font-[family-name:var(--font-jakarta)] text-[15px] font-bold">{formatCurrency(deal.value, deal.currency)}</span>
         <span className="flex items-center gap-2 text-xs text-muted-foreground">
           {deal.expectedCloseDate && (
             <span className="flex items-center gap-1" title="Expected close date">
               <CalendarDays className="h-3 w-3" /> {formatDate(deal.expectedCloseDate, { month: 'short', day: 'numeric' })}
             </span>
           )}
-          <span title={`${deal.effectiveProbability}% probability`}>{deal.effectiveProbability}%</span>
+          <span title={`${deal.effectiveProbability}% probability`} className="rounded-md bg-muted px-1.5 py-0.5 font-semibold">{deal.effectiveProbability}%</span>
           {deal.assignedTo && <Avatar name={deal.assignedTo.name} size="sm" />}
         </span>
       </div>
@@ -136,26 +137,36 @@ function Column({ column, dealIds, deals, canMove, stages, onMoveTo }: { column:
   const items = dealIds.map((id) => deals.get(id)).filter((d): d is Deal => Boolean(d));
   const total = items.reduce((sum, d) => sum + d.value, 0);
   return (
-    <section aria-label={`${column.stage.name} stage`} data-testid={`stage-${column.stage.name}`} className="flex w-72 shrink-0 flex-col rounded-xl border bg-muted/40">
-      <header className="border-b px-3 py-2.5">
+    <section
+      aria-label={`${column.stage.name} stage`}
+      data-testid={`stage-${column.stage.name}`}
+      className="flex w-[18.5rem] shrink-0 flex-col overflow-hidden rounded-2xl border bg-subtle shadow-xs"
+    >
+      <header className="relative border-b bg-card px-3.5 pb-3 pt-4">
+        <span aria-hidden className="absolute inset-x-0 top-0 h-1" style={{ background: column.stage.color }} />
         <div className="flex items-center justify-between gap-2">
-          <h2 className="flex items-center gap-2 text-sm font-semibold">
-            <span className="h-2.5 w-2.5 rounded-full" style={{ background: column.stage.color }} aria-hidden />
+          <h2 className="flex items-center gap-2 text-sm font-bold">
             {column.stage.name}
-            <span className="rounded-full bg-background px-1.5 text-xs font-medium text-muted-foreground">{items.length}</span>
+            <span className="rounded-full px-2 py-0.5 text-[11px] font-bold text-white" style={{ background: column.stage.color }}>
+              {items.length}
+            </span>
           </h2>
-          <span className="text-xs text-muted-foreground">{column.stage.probability}%</span>
+          <span className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground" title="Stage probability">
+            {column.stage.probability}%
+          </span>
         </div>
-        <p className="mt-1 text-xs text-muted-foreground">
-          {formatCurrency(total, workspace.currency)} · weighted {formatCurrency(column.weightedValue, workspace.currency)}
+        <p className="mt-1.5 text-xs text-muted-foreground">
+          <span className="font-semibold text-foreground">{formatCurrency(total, workspace.currency)}</span> · weighted {formatCurrency(column.weightedValue, workspace.currency)}
         </p>
       </header>
       <SortableContext id={column.stage.id} items={dealIds} strategy={verticalListSortingStrategy}>
-        <div ref={setNodeRef} className={cn('flex min-h-32 flex-1 flex-col gap-2 p-2 transition-colors', isOver && 'bg-accent/50')}>
+        <div ref={setNodeRef} className={cn('flex min-h-40 flex-1 flex-col gap-2 p-2.5 transition-colors duration-150', isOver && 'bg-accent/60 ring-2 ring-inset ring-primary/30')}>
           {items.map((deal) => (
             <DealCard key={deal.id} deal={deal} canMove={canMove(deal)} stages={stages} onMoveTo={onMoveTo} />
           ))}
-          {items.length === 0 && <p className="m-auto py-6 text-center text-xs text-muted-foreground">Drop deals here</p>}
+          {items.length === 0 && (
+            <p className="m-1 flex flex-1 items-center justify-center rounded-xl border-2 border-dashed py-8 text-center text-xs font-medium text-muted-foreground">Drop deals here</p>
+          )}
         </div>
       </SortableContext>
     </section>
@@ -267,7 +278,7 @@ export function KanbanBoard({ board }: { board: Board }) {
         },
       }}
     >
-      <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-4 lg:-mx-8 lg:px-8" data-testid="kanban-board">
+      <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-4 lg:-mx-8 lg:px-8" data-testid="kanban-board">
         {board.columns.map((column) => (
           <Column key={column.stage.id} column={column} dealIds={columns[column.stage.id] ?? []} deals={deals} canMove={canMove} stages={board.pipeline.stages} onMoveTo={onMoveTo} />
         ))}

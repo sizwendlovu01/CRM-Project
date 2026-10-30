@@ -1,9 +1,23 @@
 'use client';
 
 import Link from 'next/link';
-import { Lock } from 'lucide-react';
+import {
+  BadgeCheck,
+  Building2,
+  CircleDollarSign,
+  ClipboardCheck,
+  Gauge,
+  Handshake,
+  Lock,
+  Percent,
+  Scale,
+  Target,
+  TimerOff,
+  UserPlus,
+} from 'lucide-react';
 import type { AnalyticsOverview } from '@crm/shared';
-import { Avatar, Card, CardDescription, CardHeader, CardTitle, Skeleton, Table, TBody, TD, TH, THead, TR } from '@/components/ui/misc';
+import { Avatar, Card, CardDescription, CardHeader, CardTitle, IconTile, Skeleton, Table, TBody, TD, TH, THead, TR, type IconTone } from '@/components/ui/misc';
+import { NumberTicker, Stagger, StaggerItem } from '@/components/motion';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -11,51 +25,68 @@ import { useWorkspace } from '@/hooks/use-workspace';
 
 export interface Kpi {
   label: string;
-  value: string;
+  value: number;
+  format: (n: number) => string;
   hint?: string;
+  icon: React.ComponentType<{ className?: string }>;
+  iconTone: IconTone;
   tone?: 'default' | 'danger' | 'success';
   testId?: string;
 }
 
+/** All values come straight from the analytics API (live database aggregates). */
 export function buildKpis(data: AnalyticsOverview): Kpi[] {
   const k = data.kpis;
   const money = (v: number) => formatCurrency(v, data.currency);
   return [
-    { label: 'Total customers', value: formatNumber(k.totalCustomers), hint: `${formatNumber(k.newCustomers)} new in period`, testId: 'kpi-total-customers' },
-    { label: 'New customers', value: formatNumber(k.newCustomers), hint: 'Created in period' },
-    { label: 'Total leads', value: formatNumber(k.totalLeads), hint: `${formatNumber(k.newLeads)} new in period` },
-    { label: 'Qualified leads', value: formatNumber(k.qualifiedLeads), hint: 'Currently qualified' },
-    { label: 'Lead conversion', value: formatPercent(k.leadConversionRate), hint: `${k.convertedLeads} converted in period` },
-    { label: 'Active deals', value: formatNumber(k.activeDeals), hint: 'Open opportunities', testId: 'kpi-active-deals' },
-    { label: 'Pipeline value', value: money(k.pipelineValue), hint: 'Open deal value', testId: 'kpi-pipeline-value' },
-    { label: 'Weighted pipeline', value: money(k.weightedPipelineValue), hint: 'Value × probability' },
-    { label: 'Closed deals', value: formatNumber(k.closedWonDeals), hint: `${k.closedLostDeals} lost · ${formatPercent(k.winRate)} win rate` },
-    { label: 'Revenue', value: money(k.revenue), hint: 'Won deals in period', tone: 'success', testId: 'kpi-revenue' },
-    { label: 'Completed tasks', value: formatNumber(k.completedTasks), hint: `${k.openTasks} still open` },
-    { label: 'Overdue tasks', value: formatNumber(k.overdueTasks), hint: 'Past due and open', tone: k.overdueTasks > 0 ? 'danger' : 'default' },
+    { label: 'Total customers', value: k.totalCustomers, format: formatNumber, hint: `${formatNumber(k.newCustomers)} new in period`, icon: Building2, iconTone: 'green', testId: 'kpi-total-customers' },
+    { label: 'New customers', value: k.newCustomers, format: formatNumber, hint: 'Created in period', icon: UserPlus, iconTone: 'green' },
+    { label: 'Total leads', value: k.totalLeads, format: formatNumber, hint: `${formatNumber(k.newLeads)} new in period`, icon: Target, iconTone: 'red' },
+    { label: 'Qualified leads', value: k.qualifiedLeads, format: formatNumber, hint: 'Currently qualified', icon: BadgeCheck, iconTone: 'red' },
+    { label: 'Lead conversion', value: k.leadConversionRate, format: formatPercent, hint: `${k.convertedLeads} converted in period`, icon: Percent, iconTone: 'primary' },
+    { label: 'Active deals', value: k.activeDeals, format: formatNumber, hint: 'Open opportunities', icon: Handshake, iconTone: 'primary', testId: 'kpi-active-deals' },
+    { label: 'Pipeline value', value: k.pipelineValue, format: money, hint: 'Open deal value', icon: Gauge, iconTone: 'blue', testId: 'kpi-pipeline-value' },
+    { label: 'Weighted pipeline', value: k.weightedPipelineValue, format: money, hint: 'Value × probability', icon: Scale, iconTone: 'blue' },
+    { label: 'Closed deals', value: k.closedWonDeals, format: formatNumber, hint: `${k.closedLostDeals} lost · ${formatPercent(k.winRate)} win rate`, icon: CircleDollarSign, iconTone: 'green' },
+    { label: 'Revenue', value: k.revenue, format: money, hint: 'Won deals in period', icon: CircleDollarSign, iconTone: 'green', tone: 'success', testId: 'kpi-revenue' },
+    { label: 'Completed tasks', value: k.completedTasks, format: formatNumber, hint: `${k.openTasks} still open`, icon: ClipboardCheck, iconTone: 'amber' },
+    { label: 'Overdue tasks', value: k.overdueTasks, format: formatNumber, hint: 'Past due and open', icon: TimerOff, iconTone: k.overdueTasks > 0 ? 'red' : 'slate', tone: k.overdueTasks > 0 ? 'danger' : 'default' },
   ];
 }
 
 export function KpiGrid({ kpis, loading }: { kpis?: Kpi[]; loading?: boolean }) {
   if (loading || !kpis) {
     return (
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 xl:grid-cols-6">
         {Array.from({ length: 12 }, (_, i) => (
-          <Card key={i} className="p-4"><Skeleton className="h-3 w-20" /><Skeleton className="mt-3 h-6 w-16" /><Skeleton className="mt-2 h-3 w-24" /></Card>
+          <Card key={i} className="p-4">
+            <Skeleton className="h-9 w-9 rounded-xl" />
+            <Skeleton className="mt-4 h-3 w-20" />
+            <Skeleton className="mt-2 h-6 w-16" />
+          </Card>
         ))}
       </div>
     );
   }
   return (
-    <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+    <Stagger className="grid grid-cols-2 gap-3 lg:grid-cols-4 xl:grid-cols-6" role="list" aria-label="Key metrics">
       {kpis.map((kpi) => (
-        <Card key={kpi.label} className="p-4" data-testid={kpi.testId}>
-          <dt className="text-xs font-medium text-muted-foreground">{kpi.label}</dt>
-          <dd className={cn('mt-1.5 text-xl font-semibold tracking-tight', kpi.tone === 'danger' && 'text-destructive', kpi.tone === 'success' && 'text-success')}>{kpi.value}</dd>
-          {kpi.hint && <dd className="mt-0.5 text-xs text-muted-foreground">{kpi.hint}</dd>}
-        </Card>
+        <StaggerItem key={kpi.label} role="listitem">
+          <Card interactive className="h-full p-4" data-testid={kpi.testId}>
+            <div className="flex items-start justify-between gap-2">
+              <IconTile icon={kpi.icon} tone={kpi.iconTone} />
+            </div>
+            <p className="mt-3 text-xs font-semibold text-muted-foreground">{kpi.label}</p>
+            <NumberTicker
+              value={kpi.value}
+              format={kpi.format}
+              className={cn('mt-0.5 block truncate font-[family-name:var(--font-jakarta)] text-lg font-extrabold tracking-tight sm:text-[22px]', kpi.tone === 'danger' && 'text-destructive', kpi.tone === 'success' && 'text-success')}
+            />
+            {kpi.hint && <p className="mt-1 text-xs text-muted-foreground">{kpi.hint}</p>}
+          </Card>
+        </StaggerItem>
       ))}
-    </dl>
+    </Stagger>
   );
 }
 

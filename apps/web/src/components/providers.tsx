@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
+import { MotionConfig } from 'motion/react';
 import { toast, Toaster } from 'sonner';
 import { ApiError, UNAUTHORIZED_EVENT } from '@/lib/api';
 
@@ -58,9 +59,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
       <QueryClientProvider client={client}>
-        <SessionWatcher client={client} />
-        {children}
-        <Toaster richColors closeButton position="top-right" />
+        {/* Honour the OS "reduce motion" setting for every motion component. */}
+        <MotionConfig reducedMotion="user">
+          <SessionWatcher client={client} />
+          {children}
+          <Toaster richColors closeButton position="bottom-right" toastOptions={{ classNames: { toast: 'rounded-xl! shadow-lg!' } }} />
+        </MotionConfig>
       </QueryClientProvider>
     </ThemeProvider>
   );

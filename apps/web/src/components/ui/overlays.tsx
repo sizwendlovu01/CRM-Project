@@ -24,21 +24,21 @@ export function Modal({ open, onOpenChange, title, description, children, footer
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-[2px]" />
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-slate-950/45 backdrop-blur-[3px] data-[state=open]:animate-fade-in" />
         <Dialog.Content
           className={cn(
-            'fixed z-50 flex flex-col border bg-popover text-popover-foreground shadow-2xl focus:outline-none',
+            'fixed z-50 flex flex-col border bg-popover text-popover-foreground shadow-xl focus:outline-none',
             variant === 'dialog' &&
-              'left-1/2 top-1/2 max-h-[90vh] w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-xl',
+              'left-1/2 top-1/2 max-h-[90vh] w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-2xl data-[state=open]:animate-dialog-in',
             variant === 'dialog' && size === 'sm' && 'max-w-md',
             variant === 'dialog' && size === 'md' && 'max-w-lg',
             variant === 'dialog' && size === 'lg' && 'max-w-2xl',
-            variant === 'sheet' && 'inset-y-0 right-0 h-full w-full max-w-xl border-y-0 border-r-0',
+            variant === 'sheet' && 'inset-y-0 right-0 h-full w-full max-w-xl border-y-0 border-r-0 data-[state=open]:animate-sheet-in',
           )}
         >
-          <div className="flex items-start justify-between gap-4 border-b px-5 py-4">
+          <div className="flex items-start justify-between gap-4 border-b px-6 py-4">
             <div className="space-y-1">
-              <Dialog.Title className="text-base font-semibold">{title}</Dialog.Title>
+              <Dialog.Title className="font-[family-name:var(--font-jakarta)] text-lg font-bold">{title}</Dialog.Title>
               {description ? (
                 <Dialog.Description className="text-sm text-muted-foreground">{description}</Dialog.Description>
               ) : (
@@ -51,8 +51,8 @@ export function Modal({ open, onOpenChange, title, description, children, footer
               </Button>
             </Dialog.Close>
           </div>
-          <div className="flex-1 overflow-y-auto px-5 py-4">{children}</div>
-          {footer && <div className="flex flex-wrap justify-end gap-2 border-t px-5 py-3">{footer}</div>}
+          <div className="flex-1 overflow-y-auto px-6 py-5">{children}</div>
+          {footer && <div className="flex flex-wrap justify-end gap-2 rounded-b-2xl border-t bg-subtle px-6 py-3.5">{footer}</div>}
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
@@ -77,9 +77,9 @@ export function ConfirmDialog({ open, onOpenChange, title, description, confirmL
   return (
     <AlertDialog.Root open={open} onOpenChange={onOpenChange}>
       <AlertDialog.Portal>
-        <AlertDialog.Overlay className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-[2px]" />
-        <AlertDialog.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-popover p-5 shadow-2xl">
-          <AlertDialog.Title className="text-base font-semibold">{title}</AlertDialog.Title>
+        <AlertDialog.Overlay className="fixed inset-0 z-50 bg-slate-950/45 backdrop-blur-[3px] data-[state=open]:animate-fade-in" />
+        <AlertDialog.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border bg-popover p-6 shadow-xl data-[state=open]:animate-dialog-in">
+          <AlertDialog.Title className="font-[family-name:var(--font-jakarta)] text-lg font-bold">{title}</AlertDialog.Title>
           <AlertDialog.Description asChild>
             <div className="mt-2 text-sm text-muted-foreground">{description}</div>
           </AlertDialog.Description>
@@ -117,7 +117,7 @@ export function MenuContent({ className, align = 'end', ...props }: React.Compon
       <DropdownMenu.Content
         align={align}
         sideOffset={6}
-        className={cn('z-50 min-w-44 overflow-hidden rounded-lg border bg-popover p-1 text-popover-foreground shadow-lg', className)}
+        className={cn('z-50 min-w-48 overflow-hidden rounded-xl border bg-popover p-1.5 text-popover-foreground shadow-lg data-[state=open]:animate-pop-in', className)}
         {...props}
       />
     </DropdownMenu.Portal>
@@ -128,7 +128,7 @@ export function MenuItem({ className, destructive, ...props }: React.ComponentPr
   return (
     <DropdownMenu.Item
       className={cn(
-        'flex cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[highlighted]:bg-muted data-[disabled]:opacity-50 [&_svg]:size-4 [&_svg]:text-muted-foreground',
+        'flex cursor-pointer select-none items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium outline-none transition-colors data-[disabled]:pointer-events-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[disabled]:opacity-50 [&_svg]:size-4 [&_svg]:text-muted-foreground data-[highlighted]:[&_svg]:text-accent-foreground',
         destructive && 'text-destructive data-[highlighted]:bg-danger-soft [&_svg]:text-destructive',
         className,
       )}
@@ -157,7 +157,7 @@ export function MenuSubTrigger({ className, ...props }: React.ComponentPropsWith
 export function MenuSubContent({ className, ...props }: React.ComponentPropsWithoutRef<typeof DropdownMenu.SubContent>) {
   return (
     <DropdownMenu.Portal>
-      <DropdownMenu.SubContent className={cn('z-50 min-w-44 rounded-lg border bg-popover p-1 shadow-lg', className)} {...props} />
+      <DropdownMenu.SubContent className={cn('z-50 min-w-48 rounded-xl border bg-popover p-1.5 shadow-lg data-[state=open]:animate-pop-in', className)} {...props} />
     </DropdownMenu.Portal>
   );
 }
@@ -166,13 +166,13 @@ export function MenuSubContent({ className, ...props }: React.ComponentPropsWith
 
 export const Tabs = TabsPrimitive.Root;
 export function TabsList({ className, ...props }: React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>) {
-  return <TabsPrimitive.List className={cn('inline-flex h-9 items-center gap-1 rounded-lg bg-muted p-1', className)} {...props} />;
+  return <TabsPrimitive.List className={cn('inline-flex h-10 items-center gap-1 rounded-xl bg-muted p-1', className)} {...props} />;
 }
 export function TabsTrigger({ className, ...props }: React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>) {
   return (
     <TabsPrimitive.Trigger
       className={cn(
-        'inline-flex h-7 items-center rounded-md px-3 text-sm font-medium text-muted-foreground transition-colors data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm',
+        'inline-flex h-8 items-center rounded-lg px-3.5 text-sm font-semibold text-muted-foreground transition-all duration-150 hover:text-foreground data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm',
         className,
       )}
       {...props}

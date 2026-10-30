@@ -19,11 +19,12 @@ A multi-tenant customer relationship management platform for sales teams: custom
 | Analytics | KPIs, revenue, acquisition, conversion, pipeline, activity and team-performance charts from live SQL, with date ranges |
 | Notifications | In-app centre, read/unread, preferences, email via Mailpit, background reminders (BullMQ) |
 | Plans | Free / Starter / Growth / Enterprise with limits, feature gates and usage dashboard. Billing is simulated - no payment is ever collected |
+| Design | Original design system: layered canvas/surfaces, colour-coded status pills, collapsible sidebar, quick-create menu, animated Kanban, chevron stage tracker, light and dark themes, reduced-motion support ([details](docs/design-system.md)) |
 | Ops | Swagger/OpenAPI, structured logs (pino), Prometheus metrics, health checks, Docker Compose, GitHub Actions CI |
 
 ## Tech stack
 
-Next.js 15, React 19, TypeScript (strict), Tailwind CSS 4, Radix UI (shadcn-style components), TanStack Query, React Hook Form, Zod, Recharts, dnd-kit, NestJS 11, Prisma 6, PostgreSQL 16, Redis 7, BullMQ, Nodemailer + Mailpit, Jest, Supertest, Vitest, Playwright, pnpm workspaces.
+Next.js 15, React 19, TypeScript (strict), Tailwind CSS 4, Radix UI (shadcn-style components), Motion (animations), TanStack Query, React Hook Form, Zod, Recharts, dnd-kit, NestJS 11, Prisma 6, PostgreSQL 16, Redis 7, BullMQ, Nodemailer + Mailpit, Jest, Supertest, Vitest, Playwright, pnpm workspaces.
 
 ```
 apps/
@@ -88,6 +89,7 @@ See [docs/testing-report.md](docs/testing-report.md) for the latest results.
 ## Documentation
 
 - [Architecture](docs/architecture.md)
+- [Design system](docs/design-system.md)
 - [Database schema](docs/database-schema.md)
 - [API documentation](docs/api-documentation.md)
 - [Security](docs/security.md)

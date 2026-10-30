@@ -1,0 +1,18 @@
+packages:
+  - apps/*
+  - packages/*
+
+onlyBuiltDependencies:
+  - '@nestjs/core'
+  - '@prisma/client'
+  - '@prisma/engines'
+  - esbuild
+  - prisma
+  - sharp
+  - unrs-resolver
+
+# Security overrides for transitive dependencies flagged by `pnpm audit` (high severity).
+overrides:
+  multer: 2.5.0
+  postcss: 8.5.32
+  deepmerge-ts: 8.0.2

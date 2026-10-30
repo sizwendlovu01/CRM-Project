@@ -1,0 +1,132 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_TELEMETRY_DISABLED: 1
+
+jobs:
+  quality:
+    name: Lint, typecheck, unit tests, builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:shared
+      - run: pnpm --filter @crm/api exec prisma generate
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm --filter @crm/shared test
+      - run: pnpm --filter @crm/api test:unit
+      - run: pnpm --filter @crm/web test:unit
+      - run: pnpm --filter @crm/api build
+      - run: pnpm --filter @crm/web build
+      - name: Dependency audit (high and critical)
+        run: pnpm audit --prod --audit-level high
+
+  integration:
+    name: API integration tests (PostgreSQL)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: crm
+          POSTGRES_PASSWORD: crm
+          POSTGRES_DB: crm_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U crm" --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://crm:crm@localhost:5432/crm_test?schema=public
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:shared
+      - run: pnpm --filter @crm/api exec prisma generate
+      - run: pnpm --filter @crm/api test:integration
+
+  e2e:
+    name: End-to-end tests (Playwright)
+    runs-on: ubuntu-latest
+    needs: [quality]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: crm
+          POSTGRES_PASSWORD: crm
+          POSTGRES_DB: crm
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U crm" --health-interval 5s --health-timeout 5s --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+      mailpit:
+        image: axllent/mailpit:v1.32.0
+        ports: ['1025:1025', '8025:8025']
+    env:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://crm:crm@localhost:5432/crm?schema=public
+      REDIS_URL: redis://localhost:6379
+      SESSION_SECRET: ci-only-session-secret-0123456789abcdef0123456789
+      APP_URL: http://localhost:3000
+      CORS_ORIGINS: http://localhost:3000
+      SMTP_HOST: localhost
+      SMTP_PORT: 1025
+      SEED_PASSWORD: CiSeedPassword123
+      AUTH_RATE_LIMIT_PER_MINUTE: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:shared
+      - run: pnpm --filter @crm/api build
+      - run: pnpm --filter @crm/api db:deploy
+      - run: NODE_ENV=development pnpm --filter @crm/api db:seed
+      - run: pnpm --filter @crm/web build
+      - name: Start API and web
+        run: |
+          (cd apps/api && node dist/main.js > ../../api.log 2>&1 &)
+          (cd apps/web && npx next start --port 3000 > ../../web.log 2>&1 &)
+          npx --yes wait-on@8.0.3 -t 120000 http://localhost:4000/health http://localhost:3000/login
+      - run: pnpm --filter @crm/web exec playwright install --with-deps chromium
+      - run: pnpm --filter @crm/web test:e2e
+      - if: failure()
+        run: tail -n 200 api.log web.log
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report
+          retention-days: 7
+
+  docker:
+    name: Docker images build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f infrastructure/docker/api.Dockerfile -t crm-api .
+      - run: docker build -f infrastructure/docker/web.Dockerfile -t crm-web .

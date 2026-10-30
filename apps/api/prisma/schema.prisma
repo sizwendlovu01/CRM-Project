@@ -1,0 +1,563 @@
+// Enterprise SaaS CRM - relational data model.
+// Every tenant-owned table carries a non-null workspaceId and is indexed on it.
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MANAGER
+  SALES_REPRESENTATIVE
+  VIEWER
+}
+
+enum Plan {
+  FREE
+  STARTER
+  GROWTH
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+}
+
+enum AuthTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+enum CustomerType {
+  INDIVIDUAL
+  BUSINESS
+}
+
+enum CustomerStatus {
+  PROSPECT
+  ACTIVE
+  INACTIVE
+  CHURNED
+}
+
+enum RecordSource {
+  WEBSITE
+  REFERRAL
+  EVENT
+  COLD_OUTREACH
+  SOCIAL_MEDIA
+  PARTNER
+  ADVERTISING
+  LEAD_CONVERSION
+  IMPORT
+  OTHER
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  UNQUALIFIED
+  CONVERTED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum DealStatus {
+  OPEN
+  WON
+  LOST
+}
+
+enum StageType {
+  OPEN
+  WON
+  LOST
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ActivityType {
+  CALL
+  EMAIL
+  MEETING
+  NOTE
+  FOLLOW_UP
+}
+
+enum NotificationType {
+  TASK_ASSIGNED
+  WORKSPACE_INVITATION
+  LEAD_ASSIGNED
+  DEAL_ASSIGNED
+  DEAL_UPDATED
+  TASK_DUE_SOON
+  TASK_OVERDUE
+  CUSTOMER_ACTIVITY
+  MEMBER_JOINED
+}
+
+/// Platform user. A user can belong to many workspaces through Membership.
+model User {
+  id                String    @id @default(uuid()) @db.Uuid
+  email             String    @unique
+  name              String
+  passwordHash      String
+  emailVerifiedAt   DateTime?
+  jobTitle          String?
+  phone             String?
+  timezone          String    @default("UTC")
+  failedLoginCount  Int       @default(0)
+  lockedUntil       DateTime?
+  passwordChangedAt DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  sessions                Session[]
+  authTokens              AuthToken[]
+  memberships             Membership[]
+  invitationsSent         Invitation[]             @relation("InvitedBy")
+  notifications           Notification[]
+  notificationPreferences NotificationPreference[]
+  ownedWorkspaces         Workspace[]              @relation("WorkspaceOwner")
+  assignedCustomers       Customer[]               @relation("CustomerAssignee")
+  createdCustomers        Customer[]               @relation("CustomerCreator")
+  assignedLeads           Lead[]                   @relation("LeadAssignee")
+  createdLeads            Lead[]                   @relation("LeadCreator")
+  assignedDeals           Deal[]                   @relation("DealAssignee")
+  createdDeals            Deal[]                   @relation("DealCreator")
+  assignedTasks           Task[]                   @relation("TaskAssignee")
+  createdTasks            Task[]                   @relation("TaskCreator")
+  taskComments            TaskComment[]
+  activities              Activity[]
+  notes                   Note[]
+  auditLogs               AuditLog[]
+
+  @@map("users")
+}
+
+/// Server-side session. Only a SHA-256 hash of the cookie token is stored.
+model Session {
+  id         String    @id @default(uuid()) @db.Uuid
+  tokenHash  String    @unique
+  userId     String    @db.Uuid
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime  @default(now())
+  lastSeenAt DateTime  @default(now())
+  expiresAt  DateTime
+  revokedAt  DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+/// Single-use email verification and password reset tokens (hashed).
+model AuthToken {
+  id        String        @id @default(uuid()) @db.Uuid
+  userId    String        @db.Uuid
+  type      AuthTokenType
+  tokenHash String        @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime      @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@map("auth_tokens")
+}
+
+/// A tenant. All CRM data is scoped to a workspace.
+model Workspace {
+  id                 String             @id @default(uuid()) @db.Uuid
+  name               String
+  slug               String             @unique
+  ownerId            String             @db.Uuid
+  plan               Plan               @default(FREE)
+  subscriptionStatus SubscriptionStatus @default(ACTIVE)
+  currentPeriodEnd   DateTime?
+  industry           String?
+  timezone           String             @default("UTC")
+  currency           String             @default("USD")
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  owner         User           @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  memberships   Membership[]
+  invitations   Invitation[]
+  customers     Customer[]
+  leads         Lead[]
+  pipelines     Pipeline[]
+  stages        Stage[]
+  deals         Deal[]
+  tasks         Task[]
+  taskComments  TaskComment[]
+  activities    Activity[]
+  notes         Note[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
+
+  @@index([ownerId])
+  @@map("workspaces")
+}
+
+model Membership {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @db.Uuid
+  userId      String   @db.Uuid
+  role        Role
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+  @@map("memberships")
+}
+
+model Invitation {
+  id          String    @id @default(uuid()) @db.Uuid
+  workspaceId String    @db.Uuid
+  email       String
+  role        Role
+  tokenHash   String    @unique
+  invitedById String?   @db.Uuid
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invitedBy User?     @relation("InvitedBy", fields: [invitedById], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, email])
+  @@map("invitations")
+}
+
+model Customer {
+  id                String         @id @default(uuid()) @db.Uuid
+  workspaceId       String         @db.Uuid
+  fullName          String
+  company           String?
+  email             String?
+  phone             String?
+  address           String?
+  industry          String?
+  type              CustomerType   @default(BUSINESS)
+  status            CustomerStatus @default(PROSPECT)
+  source            RecordSource   @default(OTHER)
+  assignedToId      String?        @db.Uuid
+  createdById       String?        @db.Uuid
+  lastInteractionAt DateTime?
+  archivedAt        DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  workspace     Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  assignedTo    User?      @relation("CustomerAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy     User?      @relation("CustomerCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  deals         Deal[]
+  tasks         Task[]
+  activities    Activity[]
+  notes         Note[]
+  convertedFrom Lead[]     @relation("LeadConversion")
+
+  @@index([workspaceId, createdAt])
+  @@index([workspaceId, status])
+  @@index([workspaceId, assignedToId])
+  @@index([workspaceId, archivedAt])
+  @@map("customers")
+}
+
+model Lead {
+  id                  String       @id @default(uuid()) @db.Uuid
+  workspaceId         String       @db.Uuid
+  fullName            String
+  company             String?
+  email               String?
+  phone               String?
+  jobTitle            String?
+  source              RecordSource @default(OTHER)
+  status              LeadStatus   @default(NEW)
+  priority            Priority     @default(MEDIUM)
+  estimatedValue      Decimal?     @db.Decimal(14, 2)
+  description         String?
+  nextFollowUpAt      DateTime?
+  assignedToId        String?      @db.Uuid
+  createdById         String?      @db.Uuid
+  convertedAt         DateTime?
+  convertedById       String?      @db.Uuid
+  convertedCustomerId String?      @db.Uuid
+  archivedAt          DateTime?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  workspace         Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  assignedTo        User?      @relation("LeadAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy         User?      @relation("LeadCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  convertedCustomer Customer?  @relation("LeadConversion", fields: [convertedCustomerId], references: [id], onDelete: SetNull)
+  tasks             Task[]
+  activities        Activity[]
+  notes             Note[]
+
+  @@index([workspaceId, createdAt])
+  @@index([workspaceId, status])
+  @@index([workspaceId, assignedToId])
+  @@index([workspaceId, nextFollowUpAt])
+  @@index([convertedCustomerId])
+  @@map("leads")
+}
+
+model Pipeline {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @db.Uuid
+  name        String
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  stages    Stage[]
+  deals     Deal[]
+
+  @@index([workspaceId])
+  @@map("pipelines")
+}
+
+model Stage {
+  id          String    @id @default(uuid()) @db.Uuid
+  workspaceId String    @db.Uuid
+  pipelineId  String    @db.Uuid
+  name        String
+  position    Int
+  probability Int       @default(0)
+  type        StageType @default(OPEN)
+  color       String    @default("#6366f1")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  pipeline  Pipeline  @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  deals     Deal[]
+
+  @@index([pipelineId, position])
+  @@index([workspaceId])
+  @@map("stages")
+}
+
+model Deal {
+  id                String     @id @default(uuid()) @db.Uuid
+  workspaceId       String     @db.Uuid
+  pipelineId        String     @db.Uuid
+  stageId           String     @db.Uuid
+  title             String
+  value             Decimal    @default(0) @db.Decimal(14, 2)
+  probability       Int?
+  status            DealStatus @default(OPEN)
+  position          Int        @default(0)
+  expectedCloseDate DateTime?
+  closedAt          DateTime?
+  lostReason        String?
+  description       String?
+  customerId        String?    @db.Uuid
+  assignedToId      String?    @db.Uuid
+  createdById       String?    @db.Uuid
+  archivedAt        DateTime?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  workspace  Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  assignedTo User?      @relation("DealAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy  User?      @relation("DealCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  pipeline   Pipeline   @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  stage      Stage      @relation(fields: [stageId], references: [id], onDelete: NoAction)
+  customer   Customer?  @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  tasks      Task[]
+  activities Activity[]
+  notes      Note[]
+
+  @@index([workspaceId, status])
+  @@index([workspaceId, closedAt])
+  @@index([workspaceId, assignedToId])
+  @@index([stageId, position])
+  @@index([customerId])
+  @@map("deals")
+}
+
+model Task {
+  id           String     @id @default(uuid()) @db.Uuid
+  workspaceId  String     @db.Uuid
+  title        String
+  description  String?
+  status       TaskStatus @default(TODO)
+  priority     Priority   @default(MEDIUM)
+  dueAt        DateTime?
+  completedAt  DateTime?
+  assignedToId String?    @db.Uuid
+  createdById  String?    @db.Uuid
+  customerId   String?    @db.Uuid
+  dealId       String?    @db.Uuid
+  leadId       String?    @db.Uuid
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  workspace  Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  assignedTo User?         @relation("TaskAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy  User?         @relation("TaskCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  customer   Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  deal       Deal?         @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  lead       Lead?         @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  comments   TaskComment[]
+
+  @@index([workspaceId, status, dueAt])
+  @@index([workspaceId, assignedToId])
+  @@index([customerId])
+  @@index([dealId])
+  @@map("tasks")
+}
+
+model TaskComment {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @db.Uuid
+  taskId      String   @db.Uuid
+  authorId    String?  @db.Uuid
+  body        String
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  author    User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  task      Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId, createdAt])
+  @@map("task_comments")
+}
+
+model Activity {
+  id              String       @id @default(uuid()) @db.Uuid
+  workspaceId     String       @db.Uuid
+  type            ActivityType
+  subject         String
+  description     String?
+  occurredAt      DateTime     @default(now())
+  durationMinutes Int?
+  outcome         String?
+  userId          String?      @db.Uuid
+  customerId      String?      @db.Uuid
+  leadId          String?      @db.Uuid
+  dealId          String?      @db.Uuid
+  createdAt       DateTime     @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customer  Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  lead      Lead?     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  deal      Deal?     @relation(fields: [dealId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, occurredAt])
+  @@index([customerId, occurredAt])
+  @@index([leadId])
+  @@index([dealId])
+  @@map("activities")
+}
+
+model Note {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @db.Uuid
+  authorId    String?  @db.Uuid
+  body        String
+  customerId  String?  @db.Uuid
+  leadId      String?  @db.Uuid
+  dealId      String?  @db.Uuid
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  author    User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  customer  Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  lead      Lead?     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  deal      Deal?     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@index([customerId, createdAt])
+  @@index([leadId])
+  @@index([dealId])
+  @@index([workspaceId])
+  @@map("notes")
+}
+
+model Notification {
+  id          String           @id @default(uuid()) @db.Uuid
+  userId      String           @db.Uuid
+  workspaceId String?          @db.Uuid
+  type        NotificationType
+  title       String
+  body        String?
+  link        String?
+  /// Prevents duplicate reminder notifications (e.g. "task-overdue:<taskId>").
+  dedupeKey   String?
+  readAt      DateTime?
+  createdAt   DateTime         @default(now())
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dedupeKey])
+  @@index([userId, readAt, createdAt])
+  @@map("notifications")
+}
+
+model NotificationPreference {
+  id     String           @id @default(uuid()) @db.Uuid
+  userId String           @db.Uuid
+  type   NotificationType
+  inApp  Boolean          @default(true)
+  email  Boolean          @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+  @@map("notification_preferences")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @db.Uuid
+  actorId     String?  @db.Uuid
+  action      String
+  entityType  String
+  entityId    String?
+  metadata    Json?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  actor     User?     @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, createdAt])
+  @@index([workspaceId, entityType])
+  @@map("audit_logs")
+}

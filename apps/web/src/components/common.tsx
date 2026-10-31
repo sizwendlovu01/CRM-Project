@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
-import { AlertTriangle, ChevronLeft, ChevronRight, Inbox, Monitor, Moon, Search, Sun, X } from 'lucide-react';
+import { AlertTriangle, ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Inbox, Monitor, Moon, Search, Sun, X } from 'lucide-react';
 import type { PaginationMeta } from '@crm/shared';
 import { errorMessage } from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -15,7 +15,7 @@ import { IconTile, Skeleton, type IconTone } from './ui/misc';
 export function Logo({ className, withText = true }: { className?: string; withText?: boolean }) {
   return (
     <span className={cn('inline-flex items-center gap-2 font-semibold tracking-tight', className)}>
-      <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[image:var(--brand-gradient)] text-white shadow-md shadow-primary/30" aria-hidden>
+      <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary text-primary-foreground" aria-hidden>
         <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
           <path d="M4 17 L9 11 L13 14 L20 6" />
           <circle cx="20" cy="6" r="1.2" fill="currentColor" />
@@ -145,7 +145,7 @@ export function Pagination({ meta, onPageChange }: { meta: PaginationMeta; onPag
   return (
     <div className="flex flex-col items-center justify-between gap-3 border-t bg-subtle/60 px-4 py-3 text-sm sm:flex-row">
       <p className="text-muted-foreground" aria-live="polite">
-        Showing <span className="font-medium text-foreground">{from}</span>–<span className="font-medium text-foreground">{to}</span> of{' '}
+        Showing <span className="font-medium text-foreground">{from}</span> to <span className="font-medium text-foreground">{to}</span> of{' '}
         <span className="font-medium text-foreground">{meta.total}</span>
       </p>
       <div className="flex items-center gap-2">
@@ -213,11 +213,13 @@ export function FullPageLoader({ label = 'Loading…' }: { label?: string }) {
 /** Sortable column header button with aria-sort on the parent <th>. */
 export function SortButton({ label, active, direction, onClick }: { label: string; active: boolean; direction: 'asc' | 'desc'; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className={cn('inline-flex items-center gap-1 uppercase tracking-wider transition-colors hover:text-foreground', active && 'text-primary')}>
+    <button type="button" onClick={onClick} className={cn('inline-flex items-center gap-1 transition-colors hover:text-foreground', active && 'text-primary')}>
       {label}
-      <span aria-hidden className="text-[10px]">
-        {active ? (direction === 'asc' ? '▲' : '▼') : '↕'}
-      </span>
+      {active ? (
+        direction === 'asc' ? <ArrowUp aria-hidden className="h-3 w-3" /> : <ArrowDown aria-hidden className="h-3 w-3" />
+      ) : (
+        <ArrowUpDown aria-hidden className="h-3 w-3 opacity-60" />
+      )}
     </button>
   );
 }

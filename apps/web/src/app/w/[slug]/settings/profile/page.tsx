@@ -81,7 +81,7 @@ export default function ProfileSettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Profile</CardTitle>
-          <CardDescription>{me.email}{me.emailVerified ? '' : ' · not verified'}</CardDescription>
+          <CardDescription>{me.email}{me.emailVerified ? '' : ' (not verified)'}</CardDescription>
         </CardHeader>
         <CardContent>
           <form noValidate onSubmit={profile.handleSubmit((v) => saveProfile.mutate(v))} className="space-y-4">
@@ -144,7 +144,7 @@ export default function ProfileSettingsPage() {
                 <Monitor className="h-4 w-4 text-muted-foreground" />
                 <div className="flex-1">
                   <p className="font-medium">{describeAgent(s.userAgent)} {s.current && <Badge tone="success">This device</Badge>}</p>
-                  <p className="text-xs text-muted-foreground">{s.ipAddress ?? 'Unknown IP'} · last active {formatRelative(s.lastSeenAt)}</p>
+                  <p className="text-xs text-muted-foreground">{s.ipAddress ?? 'Unknown IP'}, last active {formatRelative(s.lastSeenAt)}</p>
                 </div>
                 {!s.current && <Button variant="ghost" size="sm" onClick={() => revoke.mutate(s.id)}>Revoke</Button>}
               </li>

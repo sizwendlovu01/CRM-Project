@@ -104,7 +104,7 @@ export function ImportCustomersDialog({ open, onOpenChange }: { open: boolean; o
             className="flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed px-4 py-8 text-sm text-muted-foreground hover:border-primary/50 hover:bg-muted/40"
           >
             <FileUp className="h-6 w-6" />
-            {file ? <span className="font-medium text-foreground">{file.name}</span> : <span>Click to choose a .csv file</span>}
+            {file ? <span className="font-medium text-foreground">{file.name}</span> : <span className="whitespace-nowrap">Choose a CSV file</span>}
           </button>
           <input
             ref={input}

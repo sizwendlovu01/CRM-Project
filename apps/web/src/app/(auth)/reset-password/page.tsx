@@ -28,7 +28,7 @@ function ResetForm() {
   if (!token) {
     return (
       <p role="alert" className="text-sm text-destructive">
-        This reset link is missing its token. <Link href="/forgot-password" className="font-medium underline">Request a new link</Link>.
+        This reset link is missing its token. <Link href="/forgot-password" className="font-semibold underline">Request a new link</Link>.
       </p>
     );
   }
@@ -48,7 +48,7 @@ function ResetForm() {
     <form onSubmit={onSubmit} noValidate className="space-y-4">
       {formError && (
         <div role="alert" className="rounded-md border border-destructive/30 bg-danger-soft px-3 py-2 text-sm text-destructive">
-          {formError} <Link href="/forgot-password" className="font-medium underline">Request a new link</Link>
+          {formError} <Link href="/forgot-password" className="font-semibold underline">Request a new link</Link>
         </div>
       )}
       <Field label="New password" htmlFor="password" error={formState.errors.password?.message} hint="At least 10 characters with a letter and a number.">

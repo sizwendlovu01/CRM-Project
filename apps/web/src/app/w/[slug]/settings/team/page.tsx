@@ -176,7 +176,7 @@ export default function TeamSettingsPage() {
                 <li key={inv.id} className="flex flex-wrap items-center gap-3 px-5 py-3 text-sm">
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium">{inv.email}</p>
-                    <p className="text-xs text-muted-foreground">{humanize(inv.role)} · invited {formatRelative(inv.createdAt)}{inv.invitedBy ? ` by ${inv.invitedBy.name}` : ''} · expires {formatDate(inv.expiresAt)}</p>
+                    <p className="text-xs text-muted-foreground">{humanize(inv.role)}, invited {formatRelative(inv.createdAt)}{inv.invitedBy ? ` by ${inv.invitedBy.name}` : ''}. Expires {formatDate(inv.expiresAt)}</p>
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => resend.mutate(inv.id)} loading={resend.isPending && resend.variables === inv.id}><RotateCw /> Resend</Button>
                   <Button variant="ghost" size="sm" className="text-destructive" onClick={() => revoke.mutate(inv.id)}><Trash2 /> Revoke</Button>

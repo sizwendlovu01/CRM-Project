@@ -94,14 +94,14 @@ export function CustomerTimeline({ customerId }: { customerId: string }) {
                 <p className="text-sm">
                   <span className="font-medium">{item.activity.subject}</span>{' '}
                   <span className="text-muted-foreground">
-                    · {humanize(item.activity.type)}
-                    {item.activity.durationMinutes ? ` · ${item.activity.durationMinutes} min` : ''}
-                    {item.activity.outcome ? ` · ${item.activity.outcome}` : ''}
+                    ({humanize(item.activity.type)}
+                    {item.activity.durationMinutes ? `, ${item.activity.durationMinutes} min` : ''}
+                    {item.activity.outcome ? `, ${item.activity.outcome}` : ''})
                   </span>
                 </p>
                 {item.activity.description && <p className="mt-1 whitespace-pre-line text-sm text-muted-foreground">{item.activity.description}</p>}
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {item.activity.user?.name ?? 'Former member'} · <time dateTime={item.at} title={formatDateTime(item.at)}>{formatRelative(item.at)}</time>
+                  {item.activity.user?.name ?? 'Former member'}, <time dateTime={item.at} title={formatDateTime(item.at)}>{formatRelative(item.at)}</time>
                 </p>
               </>
             )}
@@ -109,7 +109,7 @@ export function CustomerTimeline({ customerId }: { customerId: string }) {
               <>
                 <p className="whitespace-pre-line rounded-lg border bg-muted/30 px-3 py-2 text-sm">{item.note.body}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Note by {item.note.author?.name ?? 'former member'} · <time dateTime={item.at}>{formatRelative(item.at)}</time>
+                  Note by {item.note.author?.name ?? 'former member'}, <time dateTime={item.at}>{formatRelative(item.at)}</time>
                 </p>
               </>
             )}
@@ -121,7 +121,7 @@ export function CustomerTimeline({ customerId }: { customerId: string }) {
             )}
             {item.kind === 'deal' && (
               <p className="flex flex-wrap items-center gap-2 text-sm">
-                Deal <span className="font-medium">{item.deal.title}</span> · {formatCurrency(item.deal.value, workspace.currency)} <StatusBadge kind="deal" value={item.deal.status} />
+                Deal <span className="font-medium">{item.deal.title}</span>, {formatCurrency(item.deal.value, workspace.currency)} <StatusBadge kind="deal" value={item.deal.status} />
                 <span className="text-xs text-muted-foreground">{formatRelative(item.at)}</span>
               </p>
             )}

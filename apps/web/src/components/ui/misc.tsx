@@ -136,7 +136,7 @@ export function Table({ className, ...props }: React.TableHTMLAttributes<HTMLTab
   );
 }
 export function THead(props: React.HTMLAttributes<HTMLTableSectionElement>) {
-  return <thead className="border-b bg-subtle text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground" {...props} />;
+  return <thead className="border-b bg-subtle text-left text-xs font-semibold text-muted-foreground" {...props} />;
 }
 export function TBody(props: React.HTMLAttributes<HTMLTableSectionElement>) {
   return <tbody className="divide-y" {...props} />;

@@ -74,15 +74,15 @@ export default function ActivitiesPage() {
                     <div className="min-w-0 flex-1">
                       <p className="text-sm">
                         <span className="font-medium">{a.subject}</span>{' '}
-                        <span className="text-muted-foreground">· {humanize(a.type)}{a.durationMinutes ? ` · ${a.durationMinutes} min` : ''}{a.outcome ? ` · ${a.outcome}` : ''}</span>
+                        <span className="text-muted-foreground">({humanize(a.type)}{a.durationMinutes ? `, ${a.durationMinutes} min` : ''}{a.outcome ? `, ${a.outcome}` : ''})</span>
                       </p>
                       {a.description && <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">{a.description}</p>}
                       <p className="mt-1 text-xs text-muted-foreground">
                         {a.user?.name ?? 'Former member'}
-                        {a.customer && <> · <Link href={href(`/customers/${a.customer.id}`)} className="hover:text-primary">{a.customer.fullName}</Link></>}
-                        {a.deal && <> · <Link href={href(`/deals/${a.deal.id}`)} className="hover:text-primary">{a.deal.title}</Link></>}
-                        {a.lead && <> · <Link href={href(`/leads/${a.lead.id}`)} className="hover:text-primary">{a.lead.fullName}</Link></>}
-                        {' · '}
+                        {a.customer && <>, <Link href={href(`/customers/${a.customer.id}`)} className="hover:text-primary">{a.customer.fullName}</Link></>}
+                        {a.deal && <>, <Link href={href(`/deals/${a.deal.id}`)} className="hover:text-primary">{a.deal.title}</Link></>}
+                        {a.lead && <>, <Link href={href(`/leads/${a.lead.id}`)} className="hover:text-primary">{a.lead.fullName}</Link></>}
+                        {', '}
                         <time dateTime={a.occurredAt} title={formatDateTime(a.occurredAt)}>{formatRelative(a.occurredAt)}</time>
                       </p>
                     </div>

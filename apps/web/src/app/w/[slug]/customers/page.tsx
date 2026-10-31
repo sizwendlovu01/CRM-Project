@@ -300,7 +300,7 @@ function DuplicatesDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
                       {c.fullName}
                     </Link>
                     <span className="truncate text-xs text-muted-foreground">
-                      {[c.company, c.email, c.phone].filter(Boolean).join(' · ')} · added {formatDate(c.createdAt)}
+                      {[c.company, c.email, c.phone].filter(Boolean).join(', ')}, added {formatDate(c.createdAt)}
                     </span>
                   </li>
                 ))}

@@ -100,7 +100,7 @@ function WorkspaceSwitcher({ collapsed }: { collapsed?: boolean }) {
           )}
           aria-label={`Current workspace ${workspace.name}. Switch workspace`}
         >
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[image:var(--brand-gradient)] text-sm font-bold text-white shadow-sm">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
             {workspace.name.slice(0, 1).toUpperCase()}
           </span>
           {!collapsed && (
@@ -108,7 +108,7 @@ function WorkspaceSwitcher({ collapsed }: { collapsed?: boolean }) {
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-semibold">{workspace.name}</span>
                 <span className="block truncate text-xs text-muted-foreground">
-                  {humanize(workspace.plan)} · {humanize(workspace.role)}
+                  {humanize(workspace.plan)} plan, {humanize(workspace.role)}
                 </span>
               </span>
               <ChevronsUpDown className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" />
@@ -174,7 +174,7 @@ function SidebarNav({ onNavigate, collapsed, layoutGroup }: { onNavigate?: () =>
           {collapsed ? (
             <div className="mx-auto mb-2 h-px w-6 bg-border" aria-hidden />
           ) : (
-            <p className="px-3 pb-1 text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground/80">{group.label}</p>
+            <p className="px-3 pb-1 text-xs font-semibold text-muted-foreground">{group.label}</p>
           )}
           {group.items.map(link)}
         </div>
@@ -276,12 +276,12 @@ function GlobalSearch() {
       <Dialog.Trigger asChild>
         <button
           type="button"
-          className="flex h-10 w-full max-w-lg items-center gap-2.5 rounded-xl border bg-subtle px-3.5 text-sm text-muted-foreground transition-colors hover:border-primary/30 hover:bg-card"
+          className="flex h-10 w-full max-w-lg items-center gap-2.5 whitespace-nowrap rounded-xl border bg-subtle px-3.5 text-sm text-muted-foreground transition-colors hover:border-primary/30 hover:bg-card"
         >
           <Search className="h-4 w-4 shrink-0" />
           <span className="min-w-0 flex-1 truncate text-left">
             <span className="sm:hidden">Search…</span>
-            <span className="hidden sm:inline">Search customers, leads, deals…</span>
+            <span className="hidden whitespace-nowrap sm:inline">Search customers, leads, deals…</span>
           </span>
           <span className="hidden sm:inline">
             <Kbd>Ctrl K</Kbd>
@@ -289,8 +289,8 @@ function GlobalSearch() {
         </button>
       </Dialog.Trigger>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-slate-950/45 backdrop-blur-[3px] data-[state=open]:animate-fade-in" />
-        <Dialog.Content className="fixed left-1/2 top-[12vh] z-50 w-[calc(100vw-2rem)] max-w-xl -translate-x-1/2 overflow-hidden rounded-2xl border bg-popover shadow-xl data-[state=open]:animate-pop-in">
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-slate-950/50 data-[state=open]:animate-fade-in" />
+        <Dialog.Content className="fixed left-1/2 top-[12vh] z-50 w-[calc(100vw-2rem)] max-w-xl -translate-x-1/2 overflow-hidden rounded-2xl border bg-popover shadow-lg data-[state=open]:animate-pop-in">
           <Dialog.Title className="sr-only">Search</Dialog.Title>
           <Dialog.Description className="sr-only">Search across customers, leads and deals in this workspace</Dialog.Description>
           <div className="flex items-center gap-2 border-b px-4">
@@ -321,14 +321,14 @@ function GlobalSearch() {
                 {results.data.leads.length > 0 && (
                   <SearchGroup label="Leads">
                     {results.data.leads.map((l) => (
-                      <SearchItem key={l.id} icon={Target} title={l.fullName} subtitle={`${l.company ?? ''} · ${humanize(l.status)}`} onSelect={() => go(`/leads/${l.id}`)} />
+                      <SearchItem key={l.id} icon={Target} title={l.fullName} subtitle={l.company ? `${l.company}, ${humanize(l.status)}` : humanize(l.status)} onSelect={() => go(`/leads/${l.id}`)} />
                     ))}
                   </SearchGroup>
                 )}
                 {results.data.deals.length > 0 && (
                   <SearchGroup label="Deals">
                     {results.data.deals.map((d) => (
-                      <SearchItem key={d.id} icon={Briefcase} title={d.title} subtitle={`${formatCurrency(d.value)} · ${humanize(d.status)}`} onSelect={() => go(`/deals/${d.id}`)} />
+                      <SearchItem key={d.id} icon={Briefcase} title={d.title} subtitle={`${formatCurrency(d.value)}, ${humanize(d.status)}`} onSelect={() => go(`/deals/${d.id}`)} />
                     ))}
                   </SearchGroup>
                 )}
@@ -516,7 +516,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-dvh bg-canvas">
-      <aside className={cn('sticky top-0 hidden h-dvh shrink-0 border-r bg-sidebar transition-[width] duration-200 ease-out lg:block', collapsed ? 'w-[76px]' : 'w-64')}>
+      <aside className={cn('sticky top-0 hidden h-dvh shrink-0 border-r bg-sidebar lg:block', collapsed ? 'w-[76px]' : 'w-64')}>
         <SidebarContent collapsed={collapsed} onToggle={toggle} layoutGroup="desktop" />
       </aside>
 
@@ -533,7 +533,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <VerifyEmailBanner />
-        <header className="sticky top-0 z-40 flex h-16 items-center gap-2 border-b bg-card/80 px-4 backdrop-blur-md supports-[backdrop-filter]:bg-card/70 sm:gap-3 lg:px-6">
+        <header className="sticky top-0 z-40 flex h-16 items-center gap-2 border-b bg-card px-4 sm:gap-3 lg:px-6">
           <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open navigation" onClick={() => setMobileOpen(true)}>
             <MenuIcon />
           </Button>

@@ -156,7 +156,7 @@ function Column({ column, dealIds, deals, canMove, stages, onMoveTo }: { column:
           </span>
         </div>
         <p className="mt-1.5 text-xs text-muted-foreground">
-          <span className="font-semibold text-foreground">{formatCurrency(total, workspace.currency)}</span> · weighted {formatCurrency(column.weightedValue, workspace.currency)}
+          <span className="font-semibold text-foreground">{formatCurrency(total, workspace.currency)}</span>, weighted {formatCurrency(column.weightedValue, workspace.currency)}
         </p>
       </header>
       <SortableContext id={column.stage.id} items={dealIds} strategy={verticalListSortingStrategy}>

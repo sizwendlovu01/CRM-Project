@@ -46,7 +46,7 @@ function LoginForm() {
         <Input type="password" autoComplete="current-password" {...fieldA11y('password', errors.password?.message)} {...register('password')} />
       </Field>
       <div className="flex justify-end">
-        <Link href="/forgot-password" className="text-sm font-medium text-primary hover:underline">
+        <Link href="/forgot-password" className="text-sm font-semibold text-primary hover:underline">
           Forgot password?
         </Link>
       </div>
@@ -65,7 +65,7 @@ export default function LoginPage() {
       footer={
         <>
           New here?{' '}
-          <Link href="/register" className="font-medium text-primary hover:underline">
+          <Link href="/register" className="font-semibold text-primary hover:underline">
             Create an account
           </Link>
         </>

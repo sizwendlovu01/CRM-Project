@@ -57,7 +57,7 @@ function SessionWatcher({ client }: { client: QueryClient }) {
 export function Providers({ children }: { children: React.ReactNode }) {
   const [client] = useState(makeQueryClient);
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+    <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem disableTransitionOnChange>
       <QueryClientProvider client={client}>
         {/* Honour the OS "reduce motion" setting for every motion component. */}
         <MotionConfig reducedMotion="user">

@@ -28,7 +28,10 @@ function UsageBar({ label, used, limit }: { label: string; used: number; limit: 
         </span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label={`${label} usage`} aria-valuemin={0} aria-valuemax={limit ?? used} aria-valuenow={used}>
-        <div className={cn('h-full rounded-full transition-all', limit === null ? 'w-0' : tone)} style={limit === null ? undefined : { width: `${pct}%` }} />
+        <div
+          className={cn('h-full w-full origin-left rounded-full transition-transform duration-300 ease-out', limit === null ? 'scale-x-0' : tone)}
+          style={limit === null ? undefined : { transform: `scaleX(${pct / 100})` }}
+        />
       </div>
     </div>
   );

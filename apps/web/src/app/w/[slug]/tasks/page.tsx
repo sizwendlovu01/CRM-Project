@@ -70,7 +70,7 @@ function TaskDrawer({ taskId, onClose, onEdit }: { taskId: string; onClose: () =
                 <li key={c.id} className="flex gap-3">
                   <Avatar name={c.author?.name ?? '?'} size="sm" />
                   <div className="flex-1">
-                    <p className="text-xs text-muted-foreground"><span className="font-medium text-foreground">{c.author?.name ?? 'Former member'}</span> · {formatRelative(c.createdAt)}</p>
+                    <p className="text-xs text-muted-foreground"><span className="font-medium text-foreground">{c.author?.name ?? 'Former member'}</span>, {formatRelative(c.createdAt)}</p>
                     <p className="mt-0.5 whitespace-pre-line text-sm">{c.body}</p>
                   </div>
                 </li>
@@ -223,12 +223,12 @@ function TasksView() {
                         {t.title}
                       </button>
                       <span className="block text-xs text-muted-foreground">
-                        {[t.customer?.fullName, t.deal?.title].filter(Boolean).join(' · ') || '—'}
+                        {[t.customer?.fullName, t.deal?.title].filter(Boolean).join(', ') || '—'}
                         {t.commentCount > 0 && <span className="ml-2 inline-flex items-center gap-0.5"><MessageSquare className="h-3 w-3" />{t.commentCount}</span>}
                       </span>
                     </TD>
                     <TD className={cn('whitespace-nowrap text-sm', t.isOverdue ? 'font-medium text-destructive' : 'text-muted-foreground')}>
-                      {t.dueAt ? <span title={formatDateTime(t.dueAt)}>{t.isOverdue ? 'Overdue · ' : ''}{formatRelative(t.dueAt)}</span> : '—'}
+                      {t.dueAt ? <span title={formatDateTime(t.dueAt)}>{t.isOverdue ? 'Overdue, ' : ''}{formatRelative(t.dueAt)}</span> : '—'}
                     </TD>
                     <TD><PriorityBadge value={t.priority} /></TD>
                     <TD className="hidden md:table-cell"><StatusBadge kind="task" value={t.status} /></TD>

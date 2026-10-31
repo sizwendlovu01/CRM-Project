@@ -24,10 +24,10 @@ export function Modal({ open, onOpenChange, title, description, children, footer
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-slate-950/45 backdrop-blur-[3px] data-[state=open]:animate-fade-in" />
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-slate-950/50 data-[state=open]:animate-fade-in" />
         <Dialog.Content
           className={cn(
-            'fixed z-50 flex flex-col border bg-popover text-popover-foreground shadow-xl focus:outline-none',
+            'fixed z-50 flex flex-col border bg-popover text-popover-foreground shadow-lg focus:outline-none',
             variant === 'dialog' &&
               'left-1/2 top-1/2 max-h-[90vh] w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-2xl data-[state=open]:animate-dialog-in',
             variant === 'dialog' && size === 'sm' && 'max-w-md',
@@ -77,8 +77,8 @@ export function ConfirmDialog({ open, onOpenChange, title, description, confirmL
   return (
     <AlertDialog.Root open={open} onOpenChange={onOpenChange}>
       <AlertDialog.Portal>
-        <AlertDialog.Overlay className="fixed inset-0 z-50 bg-slate-950/45 backdrop-blur-[3px] data-[state=open]:animate-fade-in" />
-        <AlertDialog.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border bg-popover p-6 shadow-xl data-[state=open]:animate-dialog-in">
+        <AlertDialog.Overlay className="fixed inset-0 z-50 bg-slate-950/50 data-[state=open]:animate-fade-in" />
+        <AlertDialog.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border bg-popover p-6 shadow-lg data-[state=open]:animate-dialog-in">
           <AlertDialog.Title className="font-[family-name:var(--font-jakarta)] text-lg font-bold">{title}</AlertDialog.Title>
           <AlertDialog.Description asChild>
             <div className="mt-2 text-sm text-muted-foreground">{description}</div>
@@ -172,7 +172,7 @@ export function TabsTrigger({ className, ...props }: React.ComponentPropsWithout
   return (
     <TabsPrimitive.Trigger
       className={cn(
-        'inline-flex h-8 items-center rounded-lg px-3.5 text-sm font-semibold text-muted-foreground transition-all duration-150 hover:text-foreground data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm',
+        'inline-flex h-8 items-center rounded-lg px-3.5 text-sm font-semibold text-muted-foreground transition-[color,background-color,box-shadow] duration-150 hover:text-foreground data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm',
         className,
       )}
       {...props}

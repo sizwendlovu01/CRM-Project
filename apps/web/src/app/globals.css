@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 /*
  * Design system tokens. Components only reference these semantic tokens, never raw palette
@@ -39,7 +39,7 @@
   --info-soft: #eff8ff;
   --border: #e4e7ec;
   --border-strong: #d0d5dd;
-  --input: #d0d5dd;
+  --input: #868fa0;
   --ring: #7a6af0;
   --sidebar: #ffffff;
   --sidebar-foreground: #344054;
@@ -62,8 +62,7 @@
   --chart-6: #8b5cf6;
   --chart-grid: #eaecf0;
 
-  --brand-gradient: linear-gradient(135deg, #5b47e8 0%, #7c4dff 45%, #0ea5e9 100%);
-  --hero-gradient: linear-gradient(120deg, #efedff 0%, #e8f4ff 55%, #ecfdf3 100%);
+  --brand-deep: #3a2cb8;
 
   --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.05);
   --shadow-sm: 0 1px 3px rgba(16, 24, 40, 0.08), 0 1px 2px rgba(16, 24, 40, 0.04);
@@ -76,7 +75,7 @@
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.dark {
+[data-theme='dark'] {
   --canvas: #080c17;
   --background: #0f1524;
   --foreground: #e8ecf3;
@@ -105,7 +104,7 @@
   --info-soft: #0f2140;
   --border: #1f2940;
   --border-strong: #2d3a56;
-  --input: #2d3a56;
+  --input: #64748f;
   --ring: #8b7dff;
   --sidebar: #0c1220;
   --sidebar-foreground: #c9d1df;
@@ -128,7 +127,7 @@
   --chart-6: #8b5cf6;
   --chart-grid: #1f2940;
 
-  --hero-gradient: linear-gradient(120deg, #1b1745 0%, #0f2140 55%, #0b2a1f 100%);
+  --brand-deep: #2a2185;
 
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45);
@@ -153,6 +152,7 @@
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
+  --color-brand-deep: var(--brand-deep);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-accent: var(--accent);
@@ -230,6 +230,10 @@
   * {
     border-color: var(--border);
   }
+  html,
+  body {
+    overflow-x: clip;
+  }
   html {
     -webkit-text-size-adjust: 100%;
   }
@@ -244,6 +248,10 @@
   h3 {
     font-family: var(--font-jakarta), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
     letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
   }
   :focus-visible {
     outline: 2px solid var(--ring);
@@ -274,12 +282,6 @@
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
     border-color: var(--border-strong);
-  }
-  .text-gradient {
-    background: var(--brand-gradient);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
   }
 }
 

@@ -47,7 +47,7 @@ export function buildKpis(data: AnalyticsOverview): Kpi[] {
     { label: 'Active deals', value: k.activeDeals, format: formatNumber, hint: 'Open opportunities', icon: Handshake, iconTone: 'primary', testId: 'kpi-active-deals' },
     { label: 'Pipeline value', value: k.pipelineValue, format: money, hint: 'Open deal value', icon: Gauge, iconTone: 'blue', testId: 'kpi-pipeline-value' },
     { label: 'Weighted pipeline', value: k.weightedPipelineValue, format: money, hint: 'Value × probability', icon: Scale, iconTone: 'blue' },
-    { label: 'Closed deals', value: k.closedWonDeals, format: formatNumber, hint: `${k.closedLostDeals} lost · ${formatPercent(k.winRate)} win rate`, icon: CircleDollarSign, iconTone: 'green' },
+    { label: 'Closed deals', value: k.closedWonDeals, format: formatNumber, hint: `${k.closedLostDeals} lost, ${formatPercent(k.winRate)} win rate`, icon: CircleDollarSign, iconTone: 'green' },
     { label: 'Revenue', value: k.revenue, format: money, hint: 'Won deals in period', icon: CircleDollarSign, iconTone: 'green', tone: 'success', testId: 'kpi-revenue' },
     { label: 'Completed tasks', value: k.completedTasks, format: formatNumber, hint: `${k.openTasks} still open`, icon: ClipboardCheck, iconTone: 'amber' },
     { label: 'Overdue tasks', value: k.overdueTasks, format: formatNumber, hint: 'Past due and open', icon: TimerOff, iconTone: k.overdueTasks > 0 ? 'red' : 'slate', tone: k.overdueTasks > 0 ? 'danger' : 'default' },

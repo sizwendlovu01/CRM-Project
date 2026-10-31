@@ -38,10 +38,8 @@ export default function DashboardPage() {
 
   return (
     <>
-      <section className="relative mb-6 overflow-hidden rounded-2xl border bg-[image:var(--hero-gradient)] p-5 shadow-sm sm:p-7">
-        <div aria-hidden className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-primary/15 blur-3xl" />
-        <div aria-hidden className="pointer-events-none absolute -bottom-24 right-40 h-56 w-56 rounded-full bg-status-teal/15 blur-3xl" />
-        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+      <section className="mb-6 rounded-2xl border border-primary/15 bg-accent/50 p-5 sm:p-7">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-semibold text-primary">{new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date())}</p>
             <h1 className="mt-1 text-2xl font-extrabold tracking-tight sm:text-3xl">
@@ -113,7 +111,7 @@ export default function DashboardPage() {
                       <li key={t.id} className="flex items-center justify-between gap-3">
                         <Link href={href(`/tasks?taskId=${t.id}`)} className="min-w-0 text-sm hover:text-primary">
                           <span className="block truncate font-medium">{t.title}</span>
-                          <span className={cn('text-xs', t.isOverdue ? 'font-medium text-destructive' : 'text-muted-foreground')}>{t.dueAt ? `${t.isOverdue ? 'Overdue · ' : 'Due '}${formatRelative(t.dueAt)}` : 'No due date'}</span>
+                          <span className={cn('text-xs', t.isOverdue ? 'font-medium text-destructive' : 'text-muted-foreground')}>{t.dueAt ? `${t.isOverdue ? 'Overdue, ' : 'Due '}${formatRelative(t.dueAt)}` : 'No due date'}</span>
                         </Link>
                         <PriorityBadge value={t.priority} />
                       </li>
@@ -150,7 +148,7 @@ export default function DashboardPage() {
                           <Icon className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
                           <div className="min-w-0">
                             <p className="truncate font-medium">{a.subject}</p>
-                            <p className="truncate text-xs text-muted-foreground">{a.user?.name ?? 'Former member'}{a.customer ? ` · ${a.customer.fullName}` : ''} · {formatRelative(a.occurredAt)}</p>
+                            <p className="truncate text-xs text-muted-foreground">{a.user?.name ?? 'Former member'}{a.customer ? ` with ${a.customer.fullName}` : ''}, {formatRelative(a.occurredAt)}</p>
                           </div>
                         </li>
                       );

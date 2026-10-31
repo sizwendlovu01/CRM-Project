@@ -117,7 +117,7 @@ export default function LeadDetailPage() {
                   ...(notes.data ?? []).map((n) => ({ key: `n-${n.id}`, at: n.createdAt, node: <p className="whitespace-pre-line rounded-lg border bg-muted/30 px-3 py-2 text-sm">{n.body}</p>, by: n.author?.name, icon: null })),
                   ...(activities.data?.data ?? []).map((a) => {
                     const Icon = ACTIVITY_ICONS[a.type];
-                    return { key: `a-${a.id}`, at: a.occurredAt, node: <p className="text-sm"><span className="font-medium">{a.subject}</span> <span className="text-muted-foreground">· {humanize(a.type)}</span></p>, by: a.user?.name, icon: <Icon className="h-4 w-4 text-muted-foreground" /> };
+                    return { key: `a-${a.id}`, at: a.occurredAt, node: <p className="text-sm"><span className="font-medium">{a.subject}</span> <span className="text-muted-foreground">({humanize(a.type)})</span></p>, by: a.user?.name, icon: <Icon className="h-4 w-4 text-muted-foreground" /> };
                   }),
                 ]
                   .sort((a, b) => b.at.localeCompare(a.at))
@@ -127,7 +127,7 @@ export default function LeadDetailPage() {
                       <div className="flex-1">
                         {item.node}
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {item.by ?? 'Former member'} · {formatRelative(item.at)}
+                          {item.by ?? 'Former member'}, {formatRelative(item.at)}
                         </p>
                       </div>
                     </li>

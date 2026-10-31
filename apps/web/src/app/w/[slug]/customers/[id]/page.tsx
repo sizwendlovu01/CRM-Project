@@ -117,7 +117,7 @@ export default function CustomerDetailPage() {
                 <Avatar name={c.fullName} size="lg" />
                 <div className="min-w-0">
                   <p className="truncate font-semibold">{c.fullName}</p>
-                  <p className="text-sm text-muted-foreground">{humanize(c.type)}{c.industry ? ` · ${c.industry}` : ''}</p>
+                  <p className="text-sm text-muted-foreground">{humanize(c.type)}{c.industry ? `, ${c.industry}` : ''}</p>
                 </div>
               </div>
               <ul className="space-y-2 text-sm">
@@ -201,7 +201,7 @@ export default function CustomerDetailPage() {
                     <li key={d.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
                       <Link href={href(`/deals/${d.id}`)} className="min-w-0 font-medium hover:text-primary">
                         <span className="block truncate">{d.title}</span>
-                        <span className="block text-xs font-normal text-muted-foreground">{d.stage.name} · close {formatDate(d.expectedCloseDate)}</span>
+                        <span className="block text-xs font-normal text-muted-foreground">{d.stage.name}, closes {formatDate(d.expectedCloseDate)}</span>
                       </Link>
                       <span className="flex items-center gap-2">
                         <span className="font-medium">{formatCurrency(d.value, d.currency)}</span>

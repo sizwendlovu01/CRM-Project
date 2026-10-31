@@ -55,7 +55,7 @@ export default function DealDetailPage() {
     ...(notes.data ?? []).map((n) => ({ key: `n-${n.id}`, at: n.createdAt, by: n.author?.name, body: <p className="whitespace-pre-line rounded-lg border bg-muted/30 px-3 py-2 text-sm">{n.body}</p>, icon: null as React.ReactNode })),
     ...(activities.data?.data ?? []).map((a) => {
       const Icon = ACTIVITY_ICONS[a.type];
-      return { key: `a-${a.id}`, at: a.occurredAt, by: a.user?.name, body: <p className="text-sm"><span className="font-medium">{a.subject}</span> <span className="text-muted-foreground">· {humanize(a.type)}</span></p>, icon: <Icon className="h-4 w-4 text-muted-foreground" /> };
+      return { key: `a-${a.id}`, at: a.occurredAt, by: a.user?.name, body: <p className="text-sm"><span className="font-medium">{a.subject}</span> <span className="text-muted-foreground">({humanize(a.type)})</span></p>, icon: <Icon className="h-4 w-4 text-muted-foreground" /> };
     }),
   ].sort((a, b) => b.at.localeCompare(a.at));
 
@@ -200,7 +200,7 @@ export default function DealDetailPage() {
                     <span className="mt-1 w-4">{item.icon}</span>
                     <div className="flex-1">
                       {item.body}
-                      <p className="mt-1 text-xs text-muted-foreground">{item.by ?? 'Former member'} · {formatRelative(item.at)}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{item.by ?? 'Former member'}, {formatRelative(item.at)}</p>
                     </div>
                   </li>
                 ))}

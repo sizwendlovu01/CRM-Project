@@ -4,7 +4,11 @@ import type { NextConfig } from 'next';
  * The browser only ever talks to this Next.js origin. /api/* is proxied to the NestJS API so
  * session cookies stay first-party (SameSite=Lax) and no CORS is required in production.
  */
-const apiUrl = process.env.API_INTERNAL_URL ?? 'http://localhost:4000';
+if (process.env.VERCEL && !process.env.API_INTERNAL_URL) {
+  // Without it every /api call would be proxied to localhost and fail after deploying.
+  throw new Error('API_INTERNAL_URL must be set to the API deployment URL (for example https://your-api.vercel.app).');
+}
+const apiUrl = (process.env.API_INTERNAL_URL ?? 'http://localhost:4000').replace(/\/+$/, '');
 const isDev = process.env.NODE_ENV !== 'production';
 
 const securityHeaders = [

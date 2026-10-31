@@ -18,6 +18,8 @@ Reviewed against the OWASP Top 10 (2021) and ASVS guidance.
 | Errors and logging | Central filter returns generic messages without stack traces or SQL; pino redacts cookies, authorization, CSRF headers, passwords and tokens | `all-exceptions.filter.spec` |
 | Audit | Administrative and data-changing actions written to `audit_logs` with actor and IP | `rbac.int-spec`, billing test |
 | Secrets | No secrets in source; `.env` files git-ignored; Compose refuses to start without `POSTGRES_PASSWORD` and `SESSION_SECRET`; seed refuses production and never uses a hard-coded password | review |
+| Proxy trust (Vercel) | The web middleware forwards the client IP only together with `PROXY_SECRET`; the API accepts it only on a constant-time secret match and a valid IP, strips the secret header before logging, and discards client-supplied copies at the web edge | `client-ip.spec`, manual check through the proxy |
+| Scheduled jobs | `/api/v1/cron/*` returns 404 unless `CRON_SECRET` is set and 401 unless the bearer token matches (constant-time comparison) | manual check |
 | Open redirect | Post-login `next` parameter restricted to same-site relative paths | code review |
 
 ## Dependency audit
@@ -28,7 +30,7 @@ Reviewed against the OWASP Top 10 (2021) and ASVS guidance.
 
 - PostgreSQL row-level security is not enabled (see architecture.md); isolation is enforced in the application layer and tested.
 - Email verification is soft: unverified users can use the app and see a banner. Accepting an invitation verifies the address.
-- Rate limits are per IP. Behind a proxy, set `TRUST_PROXY=true` so the client IP is used.
+- Rate limits are per IP. Behind a proxy, set `TRUST_PROXY=true` so the client IP is used; on Vercel also set the same `PROXY_SECRET` in both projects. Without Redis, limits are kept per function instance.
 - No multi-factor authentication or SSO yet.
 
 Report vulnerabilities as described in [SECURITY.md](../SECURITY.md).

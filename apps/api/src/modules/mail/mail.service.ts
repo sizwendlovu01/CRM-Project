@@ -46,6 +46,10 @@ export class MailService implements OnModuleInit {
   }
 
   async deliver(message: MailMessage): Promise<void> {
+    if (this.env.MAIL_TRANSPORT === 'none') {
+      this.logger.warn(`Email "${message.subject}" not sent: MAIL_TRANSPORT=none`);
+      return;
+    }
     if (!this.transporter) {
       this.outbox.push(message);
       return;

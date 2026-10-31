@@ -23,12 +23,19 @@ const envSchema = z
     SMTP_PASSWORD: z.string().optional(),
     SMTP_SECURE: booleanString,
     MAIL_FROM: z.string().default('Enterprise CRM <no-reply@crm.local>'),
-    MAIL_TRANSPORT: z.enum(['smtp', 'memory']).default('smtp'),
+    // smtp: deliver through SMTP_*; none: drop messages (deployments without a mail server); memory: tests only.
+    MAIL_TRANSPORT: z.enum(['smtp', 'none', 'memory']).default('smtp'),
     JOBS_INLINE: booleanString,
     RUN_WORKER: z
       .enum(['true', 'false'])
       .default('true')
       .transform((v) => v === 'true'),
+    // Shared with the web app's proxy so the API can trust the client IP it forwards (x-crm-client-ip).
+    PROXY_SECRET: z.string().min(32, 'PROXY_SECRET must be at least 32 characters').optional(),
+    // Bearer token Vercel Cron sends to /api/v1/cron/*. Cron endpoints are disabled when unset.
+    CRON_SECRET: z.string().min(16, 'CRON_SECRET must be at least 16 characters').optional(),
+    // Set by Vercel on every deployment; recurring jobs then run from Vercel Cron instead of timers.
+    VERCEL: booleanString,
     RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(600),
     AUTH_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().positive().default(10),
     LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),

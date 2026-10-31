@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "Enterprise SaaS CRM web application (Next.js App Router).",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "next dev --port 3000",
     "build": "next build",

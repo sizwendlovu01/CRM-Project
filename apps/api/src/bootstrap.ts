@@ -4,6 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
+import { trustedClientIp } from './common/client-ip';
 import type { Env } from './config/env';
 
 /**
@@ -15,6 +16,7 @@ export function configureApp(app: INestApplication, env: Env, options: { useLogg
   if (options.useLogger !== false) app.useLogger(app.get(Logger));
 
   if (env.TRUST_PROXY) express.set('trust proxy', 1);
+  if (env.PROXY_SECRET) app.use(trustedClientIp(env.PROXY_SECRET));
   express.disable('x-powered-by');
   express.useBodyParser('json', { limit: '1mb' });
 

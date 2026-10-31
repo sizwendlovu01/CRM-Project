@@ -75,6 +75,10 @@ pnpm dev                           # API on :4000, web on :3000
 
 Without `REDIS_URL` the API runs background jobs in-process and keeps rate limits in memory. `scripts/wsl-infra.sh` runs PostgreSQL and Redis from Ubuntu packages inside WSL without root (how this project was developed on Windows without Docker).
 
+## Deploy to Vercel
+
+The API and the web app deploy as two Vercel projects from this repository (Root Directories `apps/api` and `apps/web`), with a free Neon PostgreSQL database. Each app's `vercel.json` already sets the build. Follow the step-by-step guide and environment variable list in [docs/deployment.md](docs/deployment.md#deploy-to-vercel-free-hobby-plan).
+
 ## Testing
 
 ```bash
@@ -94,7 +98,7 @@ See [docs/testing-report.md](docs/testing-report.md) for the latest results.
 - [API documentation](docs/api-documentation.md)
 - [Security](docs/security.md)
 - [Testing report](docs/testing-report.md)
-- [Deployment and free hosting](docs/deployment.md)
+- [Deployment (Docker, Vercel, free hosting)](docs/deployment.md)
 
 ## License
 

@@ -1,4 +1,6 @@
+import { setTimeout as sleep } from 'node:timers/promises';
 import { Inject, Injectable, Logger, OnApplicationBootstrap, OnModuleDestroy } from '@nestjs/common';
+import { waitUntil } from '@vercel/functions';
 import { Queue, Worker } from 'bullmq';
 import IORedis, { type Redis } from 'ioredis';
 import { ENV } from '../../config/config.module';
@@ -12,7 +14,8 @@ const MAX_ATTEMPTS = 3;
 /**
  * Background job facade.
  *  - REDIS_URL configured: BullMQ queue + worker (retries with exponential backoff, schedulers).
- *  - No Redis: jobs run in-process asynchronously with the same retry policy.
+ *  - No Redis: jobs run in-process asynchronously with the same retry policy. On Vercel the
+ *    function is kept alive until the job settles (waitUntil); outside Vercel that call is a no-op.
  *  - JOBS_INLINE (tests): jobs run synchronously so results can be asserted deterministically.
  */
 @Injectable()
@@ -73,12 +76,17 @@ export class JobsService implements OnApplicationBootstrap, OnModuleDestroy {
       });
       return;
     }
-    setImmediate(() => void this.runWithRetry(name, data, 1));
+    const job = new Promise<void>((resolve) => setImmediate(resolve)).then(() => this.runWithRetry(name, data));
+    waitUntil(job);
   }
 
-  /** Registers a recurring job. No-op in inline mode (tests trigger handlers directly). */
+  /**
+   * Registers a recurring job. No-op in inline mode (tests trigger handlers directly) and on
+   * Vercel, where functions do not stay running and Vercel Cron calls the job's endpoint instead.
+   */
   async schedule(name: string, everyMs: number): Promise<void> {
     if (this.env.JOBS_INLINE) return;
+    if (this.env.VERCEL && !this.queue) return;
     if (this.queue) {
       await this.queue.upsertJobScheduler(name, { every: everyMs }, { name, data: {} });
       return;
@@ -94,18 +102,21 @@ export class JobsService implements OnApplicationBootstrap, OnModuleDestroy {
     await handler(data);
   }
 
-  private async runWithRetry(name: string, data: Record<string, unknown>, attempt: number): Promise<void> {
-    try {
-      await this.run(name, data);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      if (attempt >= MAX_ATTEMPTS) {
-        this.logger.error(`Job ${name} failed after ${attempt} attempts: ${message}`);
+  /** Resolves once the job succeeds or exhausts its attempts; never rejects. */
+  private async runWithRetry(name: string, data: Record<string, unknown>): Promise<void> {
+    for (let attempt = 1; ; attempt += 1) {
+      try {
+        await this.run(name, data);
         return;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        if (attempt >= MAX_ATTEMPTS) {
+          this.logger.error(`Job ${name} failed after ${attempt} attempts: ${message}`);
+          return;
+        }
+        this.logger.warn(`Job ${name} attempt ${attempt} failed (${message}); retrying`);
+        await sleep(2 ** attempt * 1000, undefined, { ref: false });
       }
-      this.logger.warn(`Job ${name} attempt ${attempt} failed (${message}); retrying`);
-      const timer = setTimeout(() => void this.runWithRetry(name, data, attempt + 1), 2 ** attempt * 1000);
-      timer.unref();
     }
   }
 

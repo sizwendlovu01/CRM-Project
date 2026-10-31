@@ -1,0 +1,12 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npx --yes pnpm@10.33.0 install --frozen-lockfile --filter \"@crm/api...\"",
+  "buildCommand": "npx --yes pnpm@10.33.0 --filter \"@crm/api...\" build && npx --yes pnpm@10.33.0 run db:deploy:vercel",
+  "outputDirectory": "public",
+  "functions": {
+    "api/index.js": { "maxDuration": 60 }
+  },
+  "rewrites": [{ "source": "/(.*)", "destination": "/api" }],
+  "crons": [{ "path": "/api/v1/cron/reminders", "schedule": "0 6 * * *" }]
+}

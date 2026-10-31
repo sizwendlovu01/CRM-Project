@@ -1,17 +1,28 @@
 # Testing report
 
-Executed on 30 October 2026 on Windows 11 (Node.js 22.14, PostgreSQL 16.15 and Redis 7.0.15 in WSL, Mailpit 1.32, Chromium via Playwright 1.64).
+Executed on 30 October 2026 and re-run on 31 October 2026 (Vercel deployment changes) on Windows 11 (Node.js 22.14, PostgreSQL 16.15 and Redis 7.0.15 in WSL, Mailpit 1.32, Chromium via Playwright 1.64).
 
 | Suite | Tool | Tests | Passed | Failed | Skipped |
 | --- | --- | ---: | ---: | ---: | ---: |
 | Shared unit (permissions, plans, schemas, CSV) | Vitest | 16 | 16 | 0 | 0 |
-| API unit (crypto, CSV parsing, deal weighting, overdue logic, analytics ranges, error filter) | Jest | 23 | 23 | 0 | 0 |
+| API unit (crypto, CSV parsing, deal weighting, overdue logic, analytics ranges, error filter, trusted proxy IP) | Jest | 27 | 27 | 0 | 0 |
 | Web unit (formatters, API client, Kanban state) | Vitest | 14 | 14 | 0 | 0 |
 | API integration (real PostgreSQL, full HTTP stack) | Jest + Supertest | 45 | 45 | 0 | 0 |
 | End-to-end (real browser against running stack) | Playwright | 19 | 19 | 0 | 0 |
-| **Total** | | **117** | **117** | **0** | **0** |
+| **Total** | | **121** | **121** | **0** | **0** |
 
 Also run: TypeScript strict type checks (all packages), ESLint (all packages, 0 problems), production builds of API and web, migration deploy against a fresh database, `pnpm audit --prod` (0 high/critical; 1 moderate documented in security.md).
+
+## Vercel deployment verification (31 October 2026)
+
+No real Vercel deployment was made (that needs your Vercel account). Instead:
+
+- **Production build simulation.** `vercel build --prod` (Vercel CLI 65.9.0) ran for both projects on Linux (official Node.js 22.14 in WSL Ubuntu 24.04) from a clean copy of the repository, using the committed `vercel.json` files. Install, build, the migration step (against a local PostgreSQL) and function bundling all completed.
+- **API bundle.** The function bundle is 67 MB (the limit is 250 MB). It contains the Amazon Linux Prisma engine, the argon2 Linux binary, the compiled API and the shared package. Copied to an isolated folder and booted with no access to the repository, it served `/health`, signed in a seeded user, returned `/auth/me` and answered 404 for unknown routes.
+- **Web bundle.** The `/api/*` rewrite points at `API_INTERNAL_URL`. A build without that variable stops with a clear error.
+- **Serverless runtime.** The full Playwright suite (19/19) passed with the API served through `dist/serverless.js` in production mode, with no Redis (in-process jobs kept alive with `waitUntil`) and `VERCEL=1`. Email flows (verification, reset, invitation) were included.
+- **Per-client rate limits through the proxy.** 10 password-reset requests from one forwarded IP passed and the 11th returned 429, while a second IP was still allowed. A forged proxy secret sent straight to the API was ignored.
+- **Cron endpoint.** `/api/v1/cron/reminders` returns 401 without the bearer secret and runs the reminder scan with it.
 
 ## Integration coverage (`apps/api/test`)
 

@@ -46,3 +46,6 @@ Thumbs.db
 
 # Local pnpm virtual-store artefacts
 .crm-pnpm-vstore/
+
+# Hallmark audit records and screenshots
+.hallmark/
